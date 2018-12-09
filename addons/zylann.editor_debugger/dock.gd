@@ -14,6 +14,10 @@ var _time_before_next_update = 0.0
 var _control_highlighter = null
 
 
+func get_tree_view():
+	return _tree_view
+
+
 func _enter_tree():
 	if Util.is_in_edited_scene(self):
 		return
@@ -269,3 +273,4 @@ func _pick(root, mpos, level = 0):
 
 func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 	pass
+
