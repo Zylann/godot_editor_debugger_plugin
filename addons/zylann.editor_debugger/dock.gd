@@ -3,6 +3,9 @@ extends Control
 
 const Util = preload("util.gd")
 
+signal node_selected(node)
+
+onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 onready var _label = get_node("VBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
 
@@ -57,6 +60,8 @@ func _update_tree():
 
 func _update_branch(root, root_view):
 	if root_view.collapsed and root_view.get_children() != null:
+		# Don't care about collapsed nodes.
+		# The editor is a big tree, don't waste cycles on things you can't see
 		return
 	
 	var children_views = _get_tree_item_children(root_view)
@@ -115,7 +120,15 @@ func _on_Tree_item_selected():
 	
 	print("Selected ", node)
 	
-	if node is Control:
+	_highlight_node(node)
+	
+	emit_signal("node_selected", node)
+
+
+func _highlight_node(node):
+	if node == null:
+		_control_highlighter.hide()
+	elif node is Control:
 		var r = node.get_global_rect()
 		_control_highlighter.rect_position = r.position
 		_control_highlighter.rect_size = r.size
@@ -142,5 +155,117 @@ func _get_node_from_view(node_view):
 	return node
 
 
+func _focus_in_tree(node):
+	_update_tree()
+	
+	var parent = get_tree().get_root()
+	var path = node.get_path()
+	var parent_view = _tree_view.get_root()
+	
+	var node_view = null
+	
+	for i in range(1, path.get_name_count()):
+		var part = path.get_name(i)
+		print(part)
+		
+		var child_view = parent_view.get_children()
+		if child_view == null:
+			_update_branch(parent, parent_view)
+		
+		child_view = parent_view.get_children()
+		
+		while child_view != null and child_view.get_metadata(0) != part:
+			child_view = child_view.get_next()
+		
+		if child_view == null:
+			node_view = parent_view
+			break
+		
+		node_view = child_view
+		parent = parent.get_node(part)
+		parent_view = child_view
+	
+	if node_view != null:
+		_uncollapse_to_root(node_view)
+		node_view.select(0)
+		_tree_view.ensure_cursor_is_visible()
+
+
+static func _uncollapse_to_root(node_view):
+	var parent_view = node_view.get_parent()
+	while parent_view != null:
+		parent_view.collapsed = false
+		parent_view = parent_view.get_parent()
+
+
+static func _get_index_path(node):
+	var ipath = []
+	while node.get_parent() != null:
+		ipath.append(node.get_index())
+		node = node.get_parent()
+	ipath.invert()
+	return ipath
+
+
 func _on_Tree_nothing_selected():
 	_control_highlighter.hide()
+
+
+func _input(event):
+	if event is InputEventKey:
+		if event.pressed:
+			if event.scancode == KEY_F12:
+				pick(get_viewport().get_mouse_position())
+
+
+func pick(mpos):
+	var root = get_tree().get_root()
+	var node = _pick(root, mpos)
+	if node != null:
+		print("Picked ", node, " at ", node.get_path())
+		_focus_in_tree(node)
+	else:
+		_highlight_node(null)
+
+
+func is_inspection_enabled():
+	return _inspection_checkbox.pressed
+
+
+func _pick(root, mpos, level = 0):
+	
+#	var s = ""
+#	for i in level:
+#		s = str(s, "  ")
+#
+#	print(s, "Looking at ", root, ": ", root.name)
+	
+	var node = null
+	
+	for i in root.get_child_count():
+		var child = root.get_child(i)
+		
+		if (child is CanvasItem and not child.visible):
+			#print(s, child, " is invisible or viewport")
+			continue
+		if child is Viewport:
+			continue
+		if child == _control_highlighter:
+			continue
+		
+		if child is Control and child.get_global_rect().has_point(mpos):
+			var c = _pick(child, mpos, level + 1)
+			if c != null:
+				return c
+			else:
+				node = child
+		else:
+			var c = _pick(child, mpos, level + 1)
+			if c != null:
+				return c
+	
+	return node
+
+
+func _on_ShowInInspectorCheckbox_toggled(button_pressed):
+	pass
