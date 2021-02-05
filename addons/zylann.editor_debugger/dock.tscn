@@ -17,6 +17,9 @@ mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." index="0"]
 
@@ -31,6 +34,9 @@ mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
 alignment = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer" index="0"]
 
@@ -55,13 +61,37 @@ text = "Show in inspector"
 flat = false
 align = 0
 
-[node name="Tree" type="Tree" parent="VBoxContainer" index="1"]
+[node name="SaveBranchAsSceneButton" type="Button" parent="VBoxContainer" index="1"]
 
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 28.0
+margin_right = 262.0
+margin_bottom = 48.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+group = null
+text = "Save selected branch as scene"
+flat = false
+align = 0
+
+[node name="Tree" type="Tree" parent="VBoxContainer" index="2"]
+
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 52.0
 margin_right = 262.0
 margin_bottom = 528.0
 rect_pivot_offset = Vector2( 0, 0 )
@@ -79,7 +109,7 @@ hide_root = false
 drop_mode_flags = 0
 select_mode = 0
 
-[node name="Label" type="Label" parent="VBoxContainer" index="2"]
+[node name="Label" type="Label" parent="VBoxContainer" index="3"]
 
 anchor_left = 0.0
 anchor_top = 0.0
@@ -100,6 +130,8 @@ lines_skipped = 0
 max_lines_visible = -1
 
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
+
+[connection signal="pressed" from="VBoxContainer/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
 
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
 

@@ -6,12 +6,14 @@ const Util = preload("util.gd")
 signal node_selected(node)
 
 onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
+onready var _save_branch_as_scene_button = get_node("VBoxContainer/SaveBranchAsSceneButton")
 onready var _label = get_node("VBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
 
 var _update_interval = 1.0
 var _time_before_next_update = 0.0
 var _control_highlighter = null
+var _selected_node = null
 
 
 func get_tree_view():
@@ -120,13 +122,13 @@ static func _get_tree_item_children(item):
 
 func _on_Tree_item_selected():
 	var node_view = _tree_view.get_selected()
-	var node = _get_node_from_view(node_view)
+	_selected_node = _get_node_from_view(node_view)
 	
-	print("Selected ", node)
+	print("Selected ", _selected_node)
 	
-	_highlight_node(node)
+	_highlight_node(_selected_node)
 	
-	emit_signal("node_selected", node)
+	emit_signal("node_selected", _selected_node)
 
 
 func _highlight_node(node):
@@ -274,3 +276,13 @@ func _pick(root, mpos, level = 0):
 func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 	pass
 
+
+func _on_SaveBranchAsSceneButton_pressed():
+	if _selected_node == null:
+		return
+	# Make the selected node own all it's children
+	Util.own_all_children(_selected_node, _selected_node)
+	# Pack the selected node and it's children into a scene then save it
+	var packed_scene = PackedScene.new()
+	packed_scene.pack(_selected_node)
+	ResourceSaver.save("res://saved_from_editor_scene.tscn", packed_scene)
