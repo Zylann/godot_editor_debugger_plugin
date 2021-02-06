@@ -9,6 +9,7 @@ onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckb
 onready var _save_branch_as_scene_button = get_node("VBoxContainer/SaveBranchAsSceneButton")
 onready var _label = get_node("VBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
+onready var _save_branch_file_dialog = get_node("SaveBranchFileDialog")
 
 var _update_interval = 1.0
 var _time_before_next_update = 0.0
@@ -305,15 +306,17 @@ func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 
 
 func _on_SaveBranchAsSceneButton_pressed():
+	_save_branch_file_dialog.popup_centered_minsize(Vector2(400, 300))
+
+
+func _on_SaveBranchFileDialog_file_selected(path):
 	var node_view = _tree_view.get_selected()
 	var node = _get_node_from_view(node_view)
-	if node == null:
-		return
 	# Make the selected node own all it's children.
 	_set_all_children_ownership(node, true)
 	# Pack the selected node and it's children into a scene then save it.
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(node)
-	ResourceSaver.save("res://saved_from_editor_scene.tscn", packed_scene)
+	ResourceSaver.save(path, packed_scene)
 	# Revert ownership of all children.
 	_set_all_children_ownership(node, false)
