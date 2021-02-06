@@ -31,14 +31,3 @@ static func is_in_edited_scene(node):
 	if vp == null:
 		return false
 	return vp.get_parent() != null
-
-
-static func own_all_children(owner_node, node):
-	if owner_node is Node and node is Node:
-		_own_all_children_recursive(owner_node, node)
-
-
-static func _own_all_children_recursive(owner_node, node):
-	for child in node.get_children():
-		child.set_owner(owner_node)
-		_own_all_children_recursive(owner_node, child)

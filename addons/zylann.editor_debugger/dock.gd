@@ -14,6 +14,9 @@ var _update_interval = 1.0
 var _time_before_next_update = 0.0
 var _control_highlighter = null
 
+# Key: owned node, Value: owner node
+var _overridden_owned_nodes = {}
+
 
 func get_tree_view():
 	return _tree_view
@@ -272,6 +275,31 @@ func _pick(root, mpos, level = 0):
 	return node
 
 
+func _set_all_children_ownership(node, own):
+	if node is Node:
+		_set_all_children_ownership_recursive(node, node, own)
+
+
+func _set_all_children_ownership_recursive(owner_node, node, own):
+	if own:
+		# Make owner_node own all children of node.
+		for child in node.get_children():
+			if child.owner != null:
+				_overridden_owned_nodes[child] = child.owner
+			child.set_owner(owner_node)
+			_set_all_children_ownership_recursive(owner_node, child, true)
+	else:
+		# Make owner_node lose ownership of all children of node.
+		# Also restore node ownership to nodes which had their owner overridden.
+		for child in node.get_children():
+			if _overridden_owned_nodes.has(child):
+				child.owner = _overridden_owned_nodes[child]
+				_overridden_owned_nodes.erase(child)
+			else:
+				child.set_owner(null)
+			_set_all_children_ownership_recursive(owner_node, child, false)
+
+
 func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 	pass
 
@@ -281,9 +309,11 @@ func _on_SaveBranchAsSceneButton_pressed():
 	var node = _get_node_from_view(node_view)
 	if node == null:
 		return
-	# Make the selected node own all it's children
-	Util.own_all_children(node, node)
-	# Pack the selected node and it's children into a scene then save it
+	# Make the selected node own all it's children.
+	_set_all_children_ownership(node, true)
+	# Pack the selected node and it's children into a scene then save it.
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(node)
 	ResourceSaver.save("res://saved_from_editor_scene.tscn", packed_scene)
+	# Revert ownership of all children.
+	_set_all_children_ownership(node, false)
