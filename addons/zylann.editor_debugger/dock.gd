@@ -274,8 +274,7 @@ func _pick(root, mpos, level = 0):
 
 
 func _set_all_children_ownership(node, own, overridden_owned_nodes):
-	if not node is Node:
-		return
+	assert(node is Node)
 	overridden_owned_nodes = _set_all_children_ownership_recursive(node, node, own, overridden_owned_nodes)
 	return overridden_owned_nodes
 
