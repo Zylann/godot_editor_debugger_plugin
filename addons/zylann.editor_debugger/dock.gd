@@ -5,8 +5,9 @@ const Util = preload("util.gd")
 
 signal node_selected(node)
 
+onready var _popup_menu = get_node("PopupMenu")
+onready var _save_branch_as_scene_button = get_node("PopupMenu/SaveBranchAsSceneButton")
 onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
-onready var _save_branch_as_scene_button = get_node("VBoxContainer/SaveBranchAsSceneButton")
 onready var _label = get_node("VBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
 onready var _save_branch_file_dialog = get_node("SaveBranchFileDialog")
@@ -120,7 +121,7 @@ static func _get_tree_item_children(item):
 	return children
 
 
-func _on_Tree_item_selected():
+func _select_node():
 	var node_view = _tree_view.get_selected()
 	var node = _get_node_from_view(node_view)
 	
@@ -129,6 +130,16 @@ func _on_Tree_item_selected():
 	_highlight_node(node)
 	
 	emit_signal("node_selected", node)
+
+
+func _on_Tree_item_selected():
+	_select_node()
+
+
+func _on_Tree_item_rmb_selected(position):
+	_select_node()
+	_popup_menu.popup()
+	_popup_menu.set_position(get_viewport().get_mouse_position())
 
 
 func _highlight_node(node):
@@ -305,6 +316,8 @@ func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 
 
 func _on_SaveBranchAsSceneButton_pressed():
+	#_save_branch_as_scene_button.accept_event()
+	_popup_menu.hide()
 	_save_branch_file_dialog.popup_centered_minsize(Vector2(400, 300))
 
 
