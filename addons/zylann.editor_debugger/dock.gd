@@ -284,31 +284,31 @@ func _pick(root, mpos, level = 0):
 	return node
 
 
-func _set_all_children_ownership(node, own, overridden_owned_nodes):
-	assert(node is Node)
-	overridden_owned_nodes = _set_all_children_ownership_recursive(node, node, own, overridden_owned_nodes)
-	return overridden_owned_nodes
+static func override_ownership(root, owners):
+	assert(root is Node)
+	_override_ownership_recursive(root, root, owners)
 
 
-func _set_all_children_ownership_recursive(owner_node, node, own, overridden_owned_nodes):
-	if own:
-		# Make owner_node own all children of node.
-		for child in node.get_children():
-			if child.owner != null:
-				overridden_owned_nodes[child] = child.owner
-			child.set_owner(owner_node)
-			_set_all_children_ownership_recursive(owner_node, child, true, overridden_owned_nodes)
-	else:
-		# Make owner_node lose ownership of all children of node.
-		# Also restore node ownership to nodes which had their owner overridden.
-		for child in node.get_children():
-			if overridden_owned_nodes.has(child):
-				child.owner = overridden_owned_nodes[child]
-				overridden_owned_nodes.erase(child)
-			else:
-				child.set_owner(null)
-			_set_all_children_ownership_recursive(owner_node, child, false, overridden_owned_nodes)
-	return overridden_owned_nodes
+static func _override_ownership_recursive(root, node, owners):
+	# Make root own all children of node.
+	for child in node.get_children():
+		if child.owner != null:
+			owners[child] = child.owner
+		child.set_owner(root)
+		_override_ownership_recursive(root, child, owners)
+
+
+static func restore_ownership(root, owners):
+	assert(root is Node)
+	# Remove all of root's children's owners.
+	# Also restore node ownership to nodes which had their owner overridden.
+	for child in root.get_children():
+		if owners.has(child):
+			child.owner = owners[child]
+			owners.erase(child)
+		else:
+			child.set_owner(null)
+		restore_ownership(child, owners)
 
 
 func _on_ShowInInspectorCheckbox_toggled(button_pressed):
@@ -325,11 +325,11 @@ func _on_SaveBranchFileDialog_file_selected(path):
 	var node_view = _tree_view.get_selected()
 	var node = _get_node_from_view(node_view)
 	# Make the selected node own all it's children.
-	var overridden_owned_nodes = {}
-	overridden_owned_nodes = _set_all_children_ownership(node, true, overridden_owned_nodes)
+	var owners = {}
+	override_ownership(node, owners)
 	# Pack the selected node and it's children into a scene then save it.
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(node)
 	ResourceSaver.save(path, packed_scene)
 	# Revert ownership of all children.
-	_set_all_children_ownership(node, false, overridden_owned_nodes)
+	restore_ownership(node, owners)
