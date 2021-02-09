@@ -318,7 +318,7 @@ func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 func _on_SaveBranchAsSceneButton_pressed():
 	#_save_branch_as_scene_button.accept_event()
 	_popup_menu.hide()
-	_save_branch_file_dialog.popup_centered_minsize(Vector2(400, 300))
+	_save_branch_file_dialog.popup_centered_ratio()
 
 
 func _on_SaveBranchFileDialog_file_selected(path):
