@@ -5,9 +5,12 @@ const Util = preload("util.gd")
 
 signal node_selected(node)
 
+onready var _popup_menu = get_node("PopupMenu")
+onready var _save_branch_as_scene_button = get_node("PopupMenu/SaveBranchAsSceneButton")
 onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 onready var _label = get_node("VBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
+onready var _save_branch_file_dialog = get_node("SaveBranchFileDialog")
 
 var _update_interval = 1.0
 var _time_before_next_update = 0.0
@@ -118,7 +121,7 @@ static func _get_tree_item_children(item):
 	return children
 
 
-func _on_Tree_item_selected():
+func _select_node():
 	var node_view = _tree_view.get_selected()
 	var node = _get_node_from_view(node_view)
 	
@@ -127,6 +130,16 @@ func _on_Tree_item_selected():
 	_highlight_node(node)
 	
 	emit_signal("node_selected", node)
+
+
+func _on_Tree_item_selected():
+	_select_node()
+
+
+func _on_Tree_item_rmb_selected(position):
+	_select_node()
+	_popup_menu.popup()
+	_popup_menu.set_position(get_viewport().get_mouse_position())
 
 
 func _highlight_node(node):
@@ -271,6 +284,52 @@ func _pick(root, mpos, level = 0):
 	return node
 
 
+static func override_ownership(root, owners):
+	assert(root is Node)
+	_override_ownership_recursive(root, root, owners)
+
+
+static func _override_ownership_recursive(root, node, owners):
+	# Make root own all children of node.
+	for child in node.get_children():
+		if child.owner != null:
+			owners[child] = child.owner
+		child.set_owner(root)
+		_override_ownership_recursive(root, child, owners)
+
+
+static func restore_ownership(root, owners):
+	assert(root is Node)
+	# Remove all of root's children's owners.
+	# Also restore node ownership to nodes which had their owner overridden.
+	for child in root.get_children():
+		if owners.has(child):
+			child.owner = owners[child]
+			owners.erase(child)
+		else:
+			child.set_owner(null)
+		restore_ownership(child, owners)
+
+
 func _on_ShowInInspectorCheckbox_toggled(button_pressed):
 	pass
 
+
+func _on_SaveBranchAsSceneButton_pressed():
+	#_save_branch_as_scene_button.accept_event()
+	_popup_menu.hide()
+	_save_branch_file_dialog.popup_centered_ratio()
+
+
+func _on_SaveBranchFileDialog_file_selected(path):
+	var node_view = _tree_view.get_selected()
+	var node = _get_node_from_view(node_view)
+	# Make the selected node own all it's children.
+	var owners = {}
+	override_ownership(node, owners)
+	# Pack the selected node and it's children into a scene then save it.
+	var packed_scene = PackedScene.new()
+	packed_scene.pack(node)
+	ResourceSaver.save(path, packed_scene)
+	# Revert ownership of all children.
+	restore_ownership(node, owners)

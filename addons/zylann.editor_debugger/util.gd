@@ -31,4 +31,3 @@ static func is_in_edited_scene(node):
 	if vp == null:
 		return false
 	return vp.get_parent() != null
-

@@ -2,107 +2,62 @@
 
 [ext_resource path="res://addons/zylann.editor_debugger/dock.gd" type="Script" id=1]
 
-[node name="EditorDebugger" type="Control" index="0"]
-
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+[node name="EditorDebugger" type="Control"]
 margin_right = 262.0
 margin_bottom = 546.0
-rect_pivot_offset = Vector2( 0, 0 )
-rect_clip_content = false
-mouse_filter = 0
-mouse_default_cursor_shape = 0
-size_flags_horizontal = 1
-size_flags_vertical = 1
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." index="0"]
+[node name="PopupMenu" type="PopupMenu" parent="."]
+margin_right = 148.0
+margin_bottom = 20.0
+hide_on_item_selection = false
+hide_on_checkable_item_selection = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-anchor_left = 0.0
-anchor_top = 0.0
+[node name="SaveBranchAsSceneButton" type="Button" parent="PopupMenu"]
+margin_right = 12.0
+margin_bottom = 20.0
+text = "Save branch as scene"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_pivot_offset = Vector2( 0, 0 )
-rect_clip_content = false
-mouse_filter = 1
-mouse_default_cursor_shape = 0
-size_flags_horizontal = 1
-size_flags_vertical = 1
-alignment = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer" index="0"]
-
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+[node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
 margin_right = 262.0
 margin_bottom = 24.0
-rect_pivot_offset = Vector2( 0, 0 )
-rect_clip_content = false
-focus_mode = 2
-mouse_filter = 0
-mouse_default_cursor_shape = 0
-size_flags_horizontal = 1
-size_flags_vertical = 1
-toggle_mode = true
-enabled_focus_mode = 2
-shortcut = null
-group = null
 text = "Show in inspector"
-flat = false
-align = 0
 
-[node name="Tree" type="Tree" parent="VBoxContainer" index="1"]
-
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+[node name="Tree" type="Tree" parent="VBoxContainer"]
 margin_top = 28.0
 margin_right = 262.0
 margin_bottom = 528.0
-rect_pivot_offset = Vector2( 0, 0 )
-rect_clip_content = true
-focus_mode = 2
-mouse_filter = 0
-mouse_default_cursor_shape = 0
-size_flags_horizontal = 1
 size_flags_vertical = 3
-columns = 1
-allow_reselect = false
-allow_rmb_select = false
-hide_folding = false
-hide_root = false
-drop_mode_flags = 0
-select_mode = 0
+allow_rmb_select = true
 
-[node name="Label" type="Label" parent="VBoxContainer" index="2"]
-
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+[node name="Label" type="Label" parent="VBoxContainer"]
 margin_top = 532.0
 margin_right = 262.0
 margin_bottom = 546.0
-rect_pivot_offset = Vector2( 0, 0 )
-rect_clip_content = false
-mouse_filter = 2
-mouse_default_cursor_shape = 0
-size_flags_horizontal = 1
-size_flags_vertical = 4
 text = "Hello World"
-percent_visible = 1.0
-lines_skipped = 0
-max_lines_visible = -1
 
+[node name="SaveBranchFileDialog" type="FileDialog" parent="."]
+margin_right = 315.0
+margin_bottom = 130.0
+filters = PoolStringArray( "*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES" )
+current_file = "EditorBranch.tscn"
+current_path = "res://EditorBranch.tscn"
+[connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
-
+[connection signal="item_rmb_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_rmb_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
-
 [connection signal="nothing_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_nothing_selected"]
-
-
+[connection signal="file_selected" from="SaveBranchFileDialog" to="." method="_on_SaveBranchFileDialog_file_selected"]
