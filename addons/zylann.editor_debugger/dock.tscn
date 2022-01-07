@@ -1,18 +1,16 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://d0sxhc6l66egc"]
 
-[ext_resource path="res://addons/zylann.editor_debugger/dock.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://addons/zylann.editor_debugger/dock.gd" id="1"]
 
 [node name="EditorDebugger" type="Control"]
-margin_right = 262.0
-margin_bottom = 546.0
-script = ExtResource( 1 )
+offset_right = 238.0
+offset_bottom = 347.0
+script = ExtResource( "1" )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PopupMenu" type="PopupMenu" parent="."]
-margin_right = 148.0
-margin_bottom = 20.0
 hide_on_item_selection = false
 hide_on_checkable_item_selection = false
 __meta__ = {
@@ -20,8 +18,6 @@ __meta__ = {
 }
 
 [node name="SaveBranchAsSceneButton" type="Button" parent="PopupMenu"]
-margin_right = 12.0
-margin_bottom = 20.0
 text = "Save branch as scene"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -32,29 +28,28 @@ __meta__ = {
 }
 
 [node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
-margin_right = 262.0
-margin_bottom = 24.0
+offset_right = 238.0
+offset_bottom = 31.0
 text = "Show in inspector"
 
 [node name="Tree" type="Tree" parent="VBoxContainer"]
-margin_top = 28.0
-margin_right = 262.0
-margin_bottom = 528.0
+offset_top = 35.0
+offset_right = 238.0
+offset_bottom = 317.0
 size_flags_vertical = 3
 allow_rmb_select = true
 
 [node name="Label" type="Label" parent="VBoxContainer"]
-margin_top = 532.0
-margin_right = 262.0
-margin_bottom = 546.0
+offset_top = 321.0
+offset_right = 238.0
+offset_bottom = 347.0
 text = "Hello World"
 
 [node name="SaveBranchFileDialog" type="FileDialog" parent="."]
-margin_right = 315.0
-margin_bottom = 130.0
-filters = PoolStringArray( "*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES" )
+filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 current_file = "EditorBranch.tscn"
 current_path = "res://EditorBranch.tscn"
+
 [connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
 [connection signal="item_rmb_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_rmb_selected"]

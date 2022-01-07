@@ -1,4 +1,4 @@
-tool
+@tool
 
 
 static func get_node_in_parents(node, klass):
