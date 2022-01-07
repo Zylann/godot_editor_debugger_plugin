@@ -8,6 +8,8 @@ It's a bit the same concept as a web browser element inspector.
 
 You can also select `Control` nodes visually by pressing `F12` with the mouse on top of them.
 
+You can also right click any item within the tree to reveal a context menu with a `Save branch as scene` button. This button allows you to save a branch of the editor tree as a scene.
+
 
 How to install
 -----------------
