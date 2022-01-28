@@ -12,7 +12,3 @@ config_version=4
 
 config/name="Editor Debugger"
 config/icon="res://icon.png"
-
-[editor_plugins]
-
-enabled=PoolStringArray( "res://addons/zylann.editor_debugger/plugin.cfg" )
