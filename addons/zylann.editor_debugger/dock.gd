@@ -7,8 +7,8 @@ signal node_selected(node)
 
 onready var _popup_menu = get_node("PopupMenu")
 onready var _save_branch_as_scene_button = get_node("PopupMenu/SaveBranchAsSceneButton")
-onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
-onready var _label = get_node("VBoxContainer/Label")
+onready var _inspection_checkbox = get_node("VBoxContainer/HBoxContainer/InspectCheckbox")
+onready var _label = get_node("VBoxContainer/HBoxContainer/Label")
 onready var _tree_view = get_node("VBoxContainer/Tree")
 onready var _save_branch_file_dialog = get_node("SaveBranchFileDialog")
 
