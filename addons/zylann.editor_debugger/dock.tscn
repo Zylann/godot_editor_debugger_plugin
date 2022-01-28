@@ -31,23 +31,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
-margin_right = 262.0
-margin_bottom = 24.0
-text = "Show in inspector"
-
 [node name="Tree" type="Tree" parent="VBoxContainer"]
-margin_top = 28.0
 margin_right = 262.0
-margin_bottom = 528.0
+margin_bottom = 518.0
 size_flags_vertical = 3
 allow_rmb_select = true
 
-[node name="Label" type="Label" parent="VBoxContainer"]
-margin_top = 532.0
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 522.0
 margin_right = 262.0
 margin_bottom = 546.0
+
+[node name="InspectCheckbox" type="CheckBox" parent="VBoxContainer/HBoxContainer"]
+margin_right = 76.0
+margin_bottom = 24.0
+text = "Inspect"
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+margin_left = 80.0
+margin_right = 262.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
 text = "Hello World"
+align = 2
+valign = 1
 
 [node name="SaveBranchFileDialog" type="FileDialog" parent="."]
 margin_right = 315.0
@@ -55,9 +63,10 @@ margin_bottom = 130.0
 filters = PoolStringArray( "*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES" )
 current_file = "EditorBranch.tscn"
 current_path = "res://EditorBranch.tscn"
+
 [connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
-[connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
 [connection signal="item_rmb_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_rmb_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
 [connection signal="nothing_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_nothing_selected"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer/InspectCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
 [connection signal="file_selected" from="SaveBranchFileDialog" to="." method="_on_SaveBranchFileDialog_file_selected"]
