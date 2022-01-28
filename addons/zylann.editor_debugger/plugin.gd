@@ -10,9 +10,9 @@ func _enter_tree():
 	_dock.connect("node_selected", self, "_on_EditorDebugger_node_selected")
 	add_control_to_dock(DOCK_SLOT_RIGHT_BL, _dock)
 	
-	var editor_settings = get_editor_interface().get_editor_settings()
-	editor_settings.connect("settings_changed", self, "_on_EditorSettings_settings_changed")
-	call_deferred("_on_EditorSettings_settings_changed")
+	# var editor_settings = get_editor_interface().get_editor_settings()
+	# editor_settings.connect("settings_changed", self, "_on_EditorSettings_settings_changed")
+	# call_deferred("_on_EditorSettings_settings_changed")
 
 
 func _exit_tree():
@@ -27,6 +27,8 @@ func _on_EditorDebugger_node_selected(node):
 		get_editor_interface().inspect_object(node)
 
 
+
+# Not connected!
 func _on_EditorSettings_settings_changed():
 	var editor_settings = get_editor_interface().get_editor_settings()
 	
