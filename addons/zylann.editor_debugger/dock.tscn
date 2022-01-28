@@ -35,6 +35,7 @@ __meta__ = {
 margin_right = 262.0
 margin_bottom = 518.0
 size_flags_vertical = 3
+allow_reselect = true
 allow_rmb_select = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
