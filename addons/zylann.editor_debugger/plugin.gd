@@ -8,7 +8,7 @@ func _enter_tree():
 	_dock = load("res://addons/zylann.editor_debugger/dock.tscn")
 	_dock = _dock.instance()
 	_dock.connect("node_selected", self, "_on_EditorDebugger_node_selected")
-	add_control_to_dock(DOCK_SLOT_RIGHT_UL, _dock)
+	add_control_to_dock(DOCK_SLOT_RIGHT_BL, _dock)
 	
 	var editor_settings = get_editor_interface().get_editor_settings()
 	editor_settings.connect("settings_changed", self, "_on_EditorSettings_settings_changed")
