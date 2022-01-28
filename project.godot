@@ -6,13 +6,13 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=3
+config_version=4
 
 [application]
 
 config/name="Editor Debugger"
 config/icon="res://icon.png"
 
-[rendering]
+[editor_plugins]
 
-environment/default_environment="res://default_env.tres"
+enabled=PoolStringArray( "res://addons/zylann.editor_debugger/plugin.cfg" )
