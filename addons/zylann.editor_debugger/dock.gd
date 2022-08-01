@@ -151,8 +151,8 @@ func _highlight_node(node):
 		_control_highlighter.hide()
 	elif node is Control:
 		var r = node.get_global_rect()
-		_control_highlighter.rect_position = r.position
-		_control_highlighter.rect_size = r.size
+		_control_highlighter.position = r.position
+		_control_highlighter.size = r.size
 		_control_highlighter.show()
 	else:
 		_control_highlighter.hide()
