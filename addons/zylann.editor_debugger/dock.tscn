@@ -5,17 +5,11 @@
 [node name="EditorDebugger" type="Control"]
 offset_right = 238.0
 offset_bottom = 347.0
-script = ExtResource( "1" )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource("1")
 
 [node name="PopupMenu" type="PopupMenu" parent="."]
 hide_on_item_selection = false
 hide_on_checkable_item_selection = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="SaveBranchAsSceneButton" type="Button" parent="PopupMenu"]
 text = "Save branch as scene"
@@ -23,9 +17,6 @@ text = "Save branch as scene"
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
 offset_right = 238.0
@@ -47,8 +38,6 @@ text = "Hello World"
 
 [node name="SaveBranchFileDialog" type="FileDialog" parent="."]
 filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
-current_file = "EditorBranch.tscn"
-current_path = "res://EditorBranch.tscn"
 
 [connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
