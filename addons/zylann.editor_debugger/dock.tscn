@@ -41,7 +41,7 @@ filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 
 [connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
-[connection signal="item_rmb_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_rmb_selected"]
+[connection signal="item_mouse_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_mouse_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
 [connection signal="nothing_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_nothing_selected"]
 [connection signal="file_selected" from="SaveBranchFileDialog" to="." method="_on_SaveBranchFileDialog_file_selected"]

@@ -140,10 +140,11 @@ func _on_Tree_item_selected():
 	_select_node()
 
 
-func _on_Tree_item_rmb_selected(position):
-	_select_node()
-	_popup_menu.popup()
-	_popup_menu.set_position(get_viewport().get_mouse_position())
+func _on_Tree_item_mouse_selected(position, mouse_button_index):
+	if mouse_button_index == MOUSE_BUTTON_RIGHT:
+		_select_node()
+		_popup_menu.popup()
+		_popup_menu.set_position(get_viewport().get_mouse_position())
 
 
 func _highlight_node(node):
