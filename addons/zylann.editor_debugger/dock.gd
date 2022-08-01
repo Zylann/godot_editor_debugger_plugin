@@ -179,7 +179,7 @@ func _get_node_from_view(node_view: TreeItem):
 func _focus_in_tree(node: Node):
 	_update_tree()
 	
-	var parent := get_tree().get_root()
+	var parent : Node = get_tree().get_root()
 	var path : NodePath = node.get_path()
 	var parent_view := _tree_view.get_root()
 	
