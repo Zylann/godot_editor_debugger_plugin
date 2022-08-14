@@ -336,6 +336,6 @@ func _on_SaveBranchFileDialog_file_selected(path: String):
 	# Pack the selected node and it's children into a scene then save it.
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(node)
-	ResourceSaver.save(path, packed_scene)
+	ResourceSaver.save(packed_scene, path)
 	# Revert ownership of all children.
 	restore_ownership(node, owners, true)
