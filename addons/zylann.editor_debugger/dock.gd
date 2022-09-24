@@ -5,18 +5,18 @@ const Util = preload("util.gd")
 
 signal node_selected(node)
 
-@onready var _popup_menu = get_node("PopupMenu")
-@onready var _save_branch_as_scene_button = get_node("PopupMenu/SaveBranchAsSceneButton")
-@onready var _inspection_checkbox = get_node("VBoxContainer/ShowInInspectorCheckbox")
-@onready var _label = get_node("VBoxContainer/Label")
+@onready var _popup_menu : PopupMenu = get_node("PopupMenu")
+@onready var _save_branch_as_scene_button : Button = get_node("PopupMenu/SaveBranchAsSceneButton")
+@onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
+@onready var _label : Label = get_node("VBoxContainer/Label")
 @onready var _tree_view : Tree = get_node("VBoxContainer/Tree")
-@onready var _save_branch_file_dialog = get_node("SaveBranchFileDialog")
+@onready var _save_branch_file_dialog : FileDialog = get_node("SaveBranchFileDialog")
 
 const METADATA_NODE_NAME = 0
 
-const _update_interval = 1.0
-var _time_before_next_update = 0.0
-var _control_highlighter = null
+const _update_interval := 1.0
+var _time_before_next_update := 0.0
+var _control_highlighter : ColorRect = null
 
 
 func get_tree_view():
@@ -38,7 +38,7 @@ func _exit_tree():
 		_control_highlighter.queue_free()
 
 
-func _process(delta):
+func _process(delta: float):
 	if Util.is_in_edited_scene(self):
 		set_process(false)
 		return
@@ -111,7 +111,7 @@ func _update_node_view(node: Node, view: TreeItem):
 	view.set_text(0, str(node.get_class(), ": ", node.name))
 	view.set_metadata(METADATA_NODE_NAME, node.name)
 
-			
+
 static func _get_tree_item_children(item: TreeItem) -> Array:
 	var children := []
 	var child : TreeItem = item.get_first_child()
@@ -147,7 +147,7 @@ func _on_Tree_item_mouse_selected(position, mouse_button_index):
 		_popup_menu.set_position(get_viewport().get_mouse_position())
 
 
-func _highlight_node(node):
+func _highlight_node(node: Node):
 	if node == null:
 		_control_highlighter.hide()
 	elif node is Control:
@@ -159,7 +159,7 @@ func _highlight_node(node):
 		_control_highlighter.hide()
 
 
-func _get_node_from_view(node_view: TreeItem):
+func _get_node_from_view(node_view: TreeItem) -> Node:
 	if node_view.get_parent() == null:
 		return get_tree().get_root()
 	
@@ -184,7 +184,7 @@ func _focus_in_tree(node: Node):
 	var path : NodePath = node.get_path()
 	var parent_view := _tree_view.get_root()
 	
-	var node_view = null
+	var node_view : TreeItem = null
 	
 	for i in range(1, path.get_name_count()):
 		var part : StringName = path.get_name(i)
