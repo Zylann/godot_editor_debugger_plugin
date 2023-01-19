@@ -68,7 +68,7 @@ func _update_tree() -> void:
 
 
 func _update_branch(root: Node, root_view: TreeItem) -> void:
-	if root_view.collapsed and root_view.get_child_count() != 0:
+	if root_view.collapsed and root_view.get_first_child() != null:
 		# Don't care about collapsed nodes.
 		# The editor is a big tree, don't waste cycles on things you can't see
 		#print(root, " is collapsed and first child is ", root_view.get_first_child())
