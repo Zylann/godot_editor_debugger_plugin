@@ -1,18 +1,18 @@
 @tool
 extends Control
 
-const Util := preload("util.gd")
+const Util = preload("util.gd")
 
 signal node_selected(node)
 
-@onready var _popup_menu := get_node("PopupMenu") as PopupMenu
-@onready var _save_branch_as_scene_button := get_node("PopupMenu/SaveBranchAsSceneButton") as Button
-@onready var _inspection_checkbox := get_node("VBoxContainer/ShowInInspectorCheckbox") as CheckBox
-@onready var _label := get_node("VBoxContainer/Label") as Label
-@onready var _tree_view := get_node("VBoxContainer/Tree") as Tree
-@onready var _save_branch_file_dialog := get_node("SaveBranchFileDialog") as FileDialog
+@onready var _popup_menu: PopupMenu = get_node("PopupMenu")
+@onready var _save_branch_as_scene_button: Button = get_node("PopupMenu/SaveBranchAsSceneButton")
+@onready var _inspection_checkbox: CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
+@onready var _label: Label = get_node("VBoxContainer/Label")
+@onready var _tree_view: Tree = get_node("VBoxContainer/Tree")
+@onready var _save_branch_file_dialog: FileDialog = get_node("SaveBranchFileDialog")
 
-const METADATA_NODE_NAME := 0
+const METADATA_NODE_NAME = 0
 
 var _update_interval := 1.0
 var _time_before_next_update := 0.0
@@ -319,6 +319,7 @@ func _on_ShowInInspectorCheckbox_toggled(_button_pressed: bool) -> void:
 
 func _on_SaveBranchAsSceneButton_pressed() -> void:
 	#_save_branch_as_scene_button.accept_event()
+	print("hello?")
 	_popup_menu.hide()
 	_save_branch_file_dialog.popup_centered_ratio()
 

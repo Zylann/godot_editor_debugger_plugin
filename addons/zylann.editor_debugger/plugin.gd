@@ -1,8 +1,8 @@
 @tool
 extends EditorPlugin
 
-const Dock := preload("res://addons/zylann.editor_debugger/dock.gd")
-const DockScene: PackedScene = preload("res://addons/zylann.editor_debugger/dock.tscn")
+const Dock = preload("res://addons/zylann.editor_debugger/dock.gd")
+const DockScene = preload("res://addons/zylann.editor_debugger/dock.tscn")
 var _dock: Dock = null
 
 
