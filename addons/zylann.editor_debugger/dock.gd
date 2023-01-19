@@ -180,11 +180,11 @@ func _focus_in_tree(node: Node) -> void:
 		var part := path.get_name(i)
 		print(part)
 		
-		var child_view := parent_view.get_child(0)
+		var child_view := parent_view.get_first_child()
 		if child_view == null:
 			_update_branch(parent, parent_view)
 		
-		child_view = parent_view.get_child(0)
+		child_view = parent_view.get_first_child()
 		
 		while child_view != null and child_view.get_metadata(METADATA_NODE_NAME) != part:
 			child_view = child_view.get_next()
@@ -194,7 +194,7 @@ func _focus_in_tree(node: Node) -> void:
 			break
 		
 		node_view = child_view
-		parent = parent.get_node(String(part))
+		parent = parent.get_node(NodePath(part))
 		parent_view = child_view
 	
 	if node_view != null:
@@ -244,7 +244,7 @@ func is_inspection_enabled() -> bool:
 	return _inspection_checkbox.button_pressed
 
 
-func _pick(root: Node, mpos: Vector2, level = 0) -> Node:
+func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 	
 #	var s := ""
 #	for i in level:
@@ -288,7 +288,8 @@ static func override_ownership(root: Node, owners: Dictionary, include_internal:
 # @param root
 # @param node
 # @param {Dictionary[Node, Node]} owners
-static func _override_ownership_recursive(root: Node, node: Node, owners: Dictionary, include_internal: bool) -> void:
+static func _override_ownership_recursive(root: Node, node: Node, owners: Dictionary, 
+	include_internal: bool) -> void:
 	# Make root own all children of node.
 	for child in node.get_children(include_internal):
 		if child.owner != null:
