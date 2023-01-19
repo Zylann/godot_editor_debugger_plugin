@@ -78,7 +78,7 @@ func _update_branch(root: Node, root_view: TreeItem) -> void:
 	
 	for i in root.get_child_count(true):
 		var child := root.get_child(i, true)
-		var child_view
+		var child_view: TreeItem
 		if i >= len(children_views):
 			child_view = _create_node_view(child, root_view)
 			children_views.append(child_view)
