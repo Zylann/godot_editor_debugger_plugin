@@ -17,7 +17,7 @@ const METADATA_NODE_NAME := 0
 var _update_interval := 1.0
 var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
-
+var get_theme_icon: Callable
 
 func get_tree_view() -> Tree:
 	return _tree_view
@@ -108,7 +108,11 @@ func _create_node_view(node: Node, parent_view: TreeItem) -> TreeItem:
 func _update_node_view(node: Node, view: TreeItem) -> void:
 	assert(node is Node)
 	assert(view is TreeItem)
+	var icon_texture: Texture2D = get_theme_icon.call(node.get_class(), "Node")
+	
+	view.set_icon(0, icon_texture)
 	view.set_text(0, str(node.get_class(), ": ", node.name))
+	
 	view.set_metadata(METADATA_NODE_NAME, node.name)
 
 
