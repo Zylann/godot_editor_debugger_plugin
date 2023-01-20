@@ -327,7 +327,6 @@ func _on_ShowInInspectorCheckbox_toggled(_button_pressed: bool) -> void:
 
 func _on_SaveBranchAsSceneButton_pressed() -> void:
 	#_save_branch_as_scene_button.accept_event()
-	print("hello?")
 	_popup_menu.hide()
 	_save_branch_file_dialog.popup_centered_ratio()
 
