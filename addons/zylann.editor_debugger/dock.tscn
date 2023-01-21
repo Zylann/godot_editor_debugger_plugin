@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://addons/zylann.editor_debugger/dock.gd" id="1"]
 
 [node name="EditorDebugger" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 offset_right = 238.0
 offset_bottom = 347.0
 script = ExtResource("1")
@@ -11,35 +13,28 @@ script = ExtResource("1")
 hide_on_item_selection = false
 hide_on_checkable_item_selection = false
 
-[node name="SaveBranchAsSceneButton" type="Button" parent="PopupMenu"]
-text = "Save branch as scene"
-
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
-offset_right = 238.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Show in inspector"
 
 [node name="Tree" type="Tree" parent="VBoxContainer"]
-offset_top = 35.0
-offset_right = 238.0
-offset_bottom = 317.0
+layout_mode = 2
 size_flags_vertical = 3
 allow_rmb_select = true
 
 [node name="Label" type="Label" parent="VBoxContainer"]
-offset_top = 321.0
-offset_right = 238.0
-offset_bottom = 347.0
+layout_mode = 2
 text = "Hello World"
 
 [node name="SaveBranchFileDialog" type="FileDialog" parent="."]
 filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 
-[connection signal="pressed" from="PopupMenu/SaveBranchAsSceneButton" to="." method="_on_SaveBranchAsSceneButton_pressed"]
+[connection signal="index_pressed" from="PopupMenu" to="." method="_on_popup_menu_index_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
 [connection signal="item_mouse_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_mouse_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
