@@ -25,7 +25,7 @@ const popup_actions = {
 	POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD: "Copy node types to clipboard",
 }
 
-var _update_interval := 1.0
+const _update_interval = 1.0
 var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
 
