@@ -346,11 +346,13 @@ func _on_popup_menu_index_pressed(index: int) -> void:
 	match index:
 		POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE:
 			_save_branch_file_dialog.popup_centered_ratio()
+		
 		POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
 			DisplayServer.clipboard_set(node.get_path())
 			print("Copied to clipboard: %s"%[node.get_path()])
+		
 		POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
