@@ -341,9 +341,9 @@ func _on_ShowInInspectorCheckbox_toggled(_button_pressed: bool) -> void:
 	pass
 
 
-func _on_popup_menu_index_pressed(index: int) -> void:
+func _on_popup_menu_id_pressed(id: int) -> void:
 	_popup_menu.hide()
-	match index:
+	match id:
 		POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE:
 			_save_branch_file_dialog.popup_centered_ratio()
 		

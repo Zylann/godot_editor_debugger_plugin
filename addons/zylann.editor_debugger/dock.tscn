@@ -34,7 +34,7 @@ text = "Hello World"
 [node name="SaveBranchFileDialog" type="FileDialog" parent="."]
 filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 
-[connection signal="index_pressed" from="PopupMenu" to="." method="_on_popup_menu_index_pressed"]
+[connection signal="id_pressed" from="PopupMenu" to="." method="_on_popup_menu_id_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
 [connection signal="item_mouse_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_mouse_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
