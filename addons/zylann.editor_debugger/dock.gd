@@ -19,7 +19,7 @@ enum POPUP_ACTIONS {
 	COPY_NODE_TYPES_TO_CLIPBOARD
 }
 
-const popup_actions = {
+const _popup_action_names = {
 	POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE: "Save branch as scene",
 	POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD: "Copy path to clipboard",
 	POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD: "Copy node types to clipboard",
@@ -40,8 +40,8 @@ func get_tree_view() -> Tree:
 
 
 func _ready() -> void:
-	for id in popup_actions:
-		_popup_menu.add_item(popup_actions[id], id)
+	for id in _popup_action_names:
+		_popup_menu.add_item(_popup_action_names[id], id)
 
 
 func _enter_tree() -> void:
