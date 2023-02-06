@@ -26,6 +26,7 @@ const _popup_action_names = {
 }
 
 const _update_interval = 1.0
+
 var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
 
