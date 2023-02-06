@@ -41,7 +41,9 @@ func get_tree_view() -> Tree:
 
 func _ready() -> void:
 	for id in _popup_action_names:
-		_popup_menu.add_item(_popup_action_names[id], id)
+		if _popup_menu.get_item_index(id) == -1:
+			# item does not exist
+			_popup_menu.add_item(_popup_action_names[id], id)
 
 
 func _enter_tree() -> void:
