@@ -16,13 +16,22 @@ const METADATA_NODE_NAME = 0
 enum POPUP_ACTIONS {
 	SAVE_BRANCH_AS_SCENE,
 	COPY_PATH_TO_CLIPBOARD,
-	COPY_NODE_TYPES_TO_CLIPBOARD
+	COPY_NODE_TYPES_TO_CLIPBOARD,
 }
 
 const _popup_action_names = {
-	POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE: "Save branch as scene",
-	POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD: "Copy path to clipboard",
-	POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD: "Copy node types to clipboard",
+	POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE: {
+		"title": "Save branch as scene",
+		"tooltip": "Save the branch as a new scene in a directory of your choice"
+	},
+	POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD: {
+		"title": "Copy path to clipboard",
+		"tooltip": "Copy the path to the node in the format \"/path/to/node\""
+	},
+	POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:{
+		"title": "Copy typed path to clipboard",
+		"tooltip": "Copy the path to the node in the format [[\"type\", \"node\"], [\"type\", \"node\"], ...]"
+	},
 }
 
 const _update_interval = 1.0
@@ -41,11 +50,11 @@ func get_tree_view() -> Tree:
 
 
 func _ready() -> void:
+	_popup_menu.clear()
 	for id in _popup_action_names:
-		if _popup_menu.get_item_index(id) == -1:
-			# item does not exist
-			_popup_menu.add_item(_popup_action_names[id], id)
-
+		_popup_menu.add_item(_popup_action_names[id].title, id)
+		var index := _popup_menu.get_item_index(id)
+		_popup_menu.set_item_tooltip(index, _popup_action_names[id].tooltip)
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
