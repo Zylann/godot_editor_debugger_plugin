@@ -6,7 +6,6 @@ const Util = preload("util.gd")
 signal node_selected(node)
 
 @onready var _popup_menu: PopupMenu = get_node("PopupMenu")
-@onready var _save_branch_as_scene_button: Button = get_node("PopupMenu/SaveBranchAsSceneButton")
 @onready var _inspection_checkbox: CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 @onready var _label: Label = get_node("VBoxContainer/Label")
 @onready var _tree_view: Tree = get_node("VBoxContainer/Tree")
@@ -14,7 +13,29 @@ signal node_selected(node)
 
 const METADATA_NODE_NAME = 0
 
-var _update_interval := 1.0
+enum POPUP_ACTIONS {
+	SAVE_BRANCH_AS_SCENE,
+	COPY_PATH_TO_CLIPBOARD,
+	COPY_NODE_TYPES_TO_CLIPBOARD,
+}
+
+const _popup_action_names = {
+	POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE: {
+		"title": "Save branch as scene",
+		"tooltip": "Save the branch as a new scene in a directory of your choice"
+	},
+	POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD: {
+		"title": "Copy path to clipboard",
+		"tooltip": "Copy the path to the node in the format \"/path/to/node\""
+	},
+	POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:{
+		"title": "Copy typed path to clipboard",
+		"tooltip": "Copy the path to the node in the format [[\"type\", \"node\"], [\"type\", \"node\"], ...]"
+	},
+}
+
+const _update_interval = 1.0
+
 var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
 
@@ -27,6 +48,13 @@ var _no_texture := get_theme_icon("", "EditorIcons")
 func get_tree_view() -> Tree:
 	return _tree_view
 
+
+func _ready() -> void:
+	_popup_menu.clear()
+	for id in _popup_action_names:
+		_popup_menu.add_item(_popup_action_names[id].title, id)
+		var index := _popup_menu.get_item_index(id)
+		_popup_menu.set_item_tooltip(index, _popup_action_names[id].tooltip)
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
@@ -325,10 +353,30 @@ func _on_ShowInInspectorCheckbox_toggled(_button_pressed: bool) -> void:
 	pass
 
 
-func _on_SaveBranchAsSceneButton_pressed() -> void:
-	#_save_branch_as_scene_button.accept_event()
+func _on_popup_menu_id_pressed(id: int) -> void:
 	_popup_menu.hide()
-	_save_branch_file_dialog.popup_centered_ratio()
+	match id:
+		POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE:
+			_save_branch_file_dialog.popup_centered_ratio()
+		
+		POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD:
+			var node_view := _tree_view.get_selected()
+			var node := _get_node_from_view(node_view)
+			DisplayServer.clipboard_set(node.get_path())
+			print("Copied to clipboard: %s"%[node.get_path()])
+		
+		POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:
+			var node_view := _tree_view.get_selected()
+			var node := _get_node_from_view(node_view)
+			var node_types := []
+			while node.get_parent():
+				var tuple := PackedStringArray([node.get_class(), node.name])
+				node_types.append(tuple)
+				node = node.get_parent()
+			node_types.reverse()
+			var node_types_str := "%s"%[node_types]
+			DisplayServer.clipboard_set(node_types_str)
+			print("Copied to clipboard: %s"%[node_types_str])
 
 
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
@@ -343,4 +391,5 @@ func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	ResourceSaver.save(packed_scene, path)
 	# Revert ownership of all children.
 	restore_ownership(node, owners, true)
+
 
