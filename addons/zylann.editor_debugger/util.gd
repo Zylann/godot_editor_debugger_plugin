@@ -4,7 +4,7 @@
 static func get_node_in_parents(node: Node, klass) -> Node:
 	while node != null:
 		node = node.get_parent()
-		if node != null and node is klass:
+		if node != null and is_instance_of(node, klass):
 			return node
 	return null
 
