@@ -1,15 +1,15 @@
 @tool
 
 
-static func get_node_in_parents(node, klass):
+static func get_node_in_parents(node: Node, klass) -> Node:
 	while node != null:
 		node = node.get_parent()
-		if node != null and node is klass:
+		if node != null and is_instance_of(node, klass):
 			return node
 	return null
 
 
-static func is_in_edited_scene(node):
+static func is_in_edited_scene(node: Node) -> bool:
 	#                               .___.
 	#           /)               ,-^     ^-. 
 	#          //               /           \
@@ -27,7 +27,7 @@ static func is_in_edited_scene(node):
 	# Obviously it won't work for nested viewports since that's basically what this function checks.
 	if not node.is_inside_tree():
 		return false
-	var vp = get_node_in_parents(node, Viewport)
+	var vp := get_node_in_parents(node, Viewport)
 	if vp == null:
 		return false
 	return vp.get_parent() != null
