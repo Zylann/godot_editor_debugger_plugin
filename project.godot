@@ -8,11 +8,8 @@
 
 config_version=5
 
-_global_script_classes=[]
-_global_script_class_icons={}
-
 [application]
 
 config/name="Editor Debugger"
-config/features=PackedStringArray("4.0")
+config/features=PackedStringArray("4.1")
 config/icon="res://icon.png"
