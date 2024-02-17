@@ -17,6 +17,7 @@ enum POPUP_ACTIONS {
 	SAVE_BRANCH_AS_SCENE,
 	COPY_PATH_TO_CLIPBOARD,
 	COPY_NODE_TYPES_TO_CLIPBOARD,
+	COPY_NODE_CHILD_PATH_INDICES
 }
 
 const _popup_action_names = {
@@ -32,6 +33,10 @@ const _popup_action_names = {
 		"title": "Copy typed path to clipboard",
 		"tooltip": "Copy the path to the node in the format [[\"type\", \"node\"], [\"type\", \"node\"], ...]"
 	},
+	POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:{
+		"title": "Copy child path indicies",
+		"tooltip": "Copy the get_child() path indicies"
+	}
 }
 
 const _update_interval = 1.0
@@ -375,6 +380,13 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 			var node_types_str := "%s"%[node_types]
 			DisplayServer.clipboard_set(node_types_str)
 			print("Copied to clipboard: %s"%[node_types_str])
+		
+		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
+			var node_view := _tree_view.get_selected()
+			var node := _get_node_from_view(node_view)
+			DisplayServer.clipboard_set(path_to_get_child_string(node.get_path()))
+			print("Copied to clipboard: %s"%[path_to_get_child_string(node.get_path())])
+
 
 
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
@@ -389,5 +401,29 @@ func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	ResourceSaver.save(packed_scene, path)
 	# Revert ownership of all children.
 	restore_ownership(node, owners, true)
+
+func path_to_get_child_string(node_path: String) -> String:
+	var path_segments = node_path.split("/", false)
+	var current_node = get_tree().root
+	var get_child_string = "get_tree().root"
+
+	for i in range(1, path_segments.size()):
+		var segment = path_segments[i]
+		var child_index = find_child_index_by_name(current_node, segment)
+		
+		if child_index != -1:
+			get_child_string += ".get_child(%d)" % child_index
+			current_node = current_node.get_child(child_index)
+		else:
+			print("Child not found: ", segment)
+			return ""
+
+	return get_child_string
+
+func find_child_index_by_name(parent_node, child_name: String) -> int:
+	for i in range(parent_node.get_child_count()):
+		if parent_node.get_child(i).name == child_name:
+			return i
+	return -1 
 
 
