@@ -17,6 +17,7 @@ enum POPUP_ACTIONS {
 	SAVE_BRANCH_AS_SCENE,
 	COPY_PATH_TO_CLIPBOARD,
 	COPY_NODE_TYPES_TO_CLIPBOARD,
+	COPY_NODE_CHILD_PATH_INDICES
 }
 
 const _popup_action_names = {
@@ -32,6 +33,10 @@ const _popup_action_names = {
 		"title": "Copy typed path to clipboard",
 		"tooltip": "Copy the path to the node in the format [[\"type\", \"node\"], [\"type\", \"node\"], ...]"
 	},
+	POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:{
+		"title": "Copy child path indicies",
+		"tooltip": "Copy the get_child() path indicies"
+	}
 }
 
 const _update_interval = 1.0
@@ -375,6 +380,15 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 			var node_types_str := "%s"%[node_types]
 			DisplayServer.clipboard_set(node_types_str)
 			print("Copied to clipboard: %s"%[node_types_str])
+		
+		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
+			var node_view := _tree_view.get_selected()
+			var node := _get_node_from_view(node_view)
+			var index_path = get_node_index_path(node)
+			var string_path = path_to_get_child_string(index_path)
+			DisplayServer.clipboard_set(string_path)
+			print("Copied to clipboard: %s"%[string_path])
+
 
 
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
@@ -389,5 +403,21 @@ func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	ResourceSaver.save(packed_scene, path)
 	# Revert ownership of all children.
 	restore_ownership(node, owners, true)
+	
+static func get_node_index_path(node: Node) -> PackedInt32Array:
+	var ipath := PackedInt32Array()
+
+	while node.get_parent() != null:
+		ipath.append(node.get_index(true))
+		node = node.get_parent()
+
+	ipath.reverse()
+	return ipath
+
+static func path_to_get_child_string(ipath: PackedInt32Array) -> String:
+	var code = "get_tree().root"
+	for i in ipath:
+		code += str(".get_child(", i, ")")
+	return code
 
 
