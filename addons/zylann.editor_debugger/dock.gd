@@ -3,7 +3,7 @@ extends Control
 
 const Util = preload("util.gd")
 
-signal node_selected(node)
+signal node_selected(node: Node)
 
 @onready var _popup_menu : PopupMenu = get_node("PopupMenu")
 @onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
@@ -20,7 +20,7 @@ enum POPUP_ACTIONS {
 	COPY_NODE_CHILD_PATH_INDICES
 }
 
-const _popup_action_names = {
+const _popup_action_names: Dictionary = {
 	POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE: {
 		"title": "Save branch as scene",
 		"tooltip": "Save the branch as a new scene in a directory of your choice"
@@ -56,10 +56,11 @@ func get_tree_view() -> Tree:
 
 func _ready() -> void:
 	_popup_menu.clear()
-	for id in _popup_action_names:
-		_popup_menu.add_item(_popup_action_names[id].title, id)
+	for id: int in _popup_action_names:
+		var popup_data: Dictionary = _popup_action_names[id]
+		_popup_menu.add_item(str(popup_data.title), id)
 		var index := _popup_menu.get_item_index(id)
-		_popup_menu.set_item_tooltip(index, _popup_action_names[id].tooltip)
+		_popup_menu.set_item_tooltip(index, str(popup_data.tooltip))
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
@@ -172,13 +173,6 @@ func _on_Tree_item_selected() -> void:
 	_select_node()
 
 
-func _on_Tree_item_mouse_selected(position: Vector2, mouse_button_index: int) -> void:
-	if mouse_button_index == MOUSE_BUTTON_RIGHT:
-		_select_node()
-		_popup_menu.popup()
-		_popup_menu.set_position(get_viewport().get_mouse_position())
-
-
 func _highlight_node(node: Node) -> void:
 	if node is Control:
 		var target_control := (node as Control)
@@ -264,10 +258,10 @@ func _on_Tree_nothing_selected() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		if event.pressed:
-			if event.keycode == KEY_F12:
-				pick(get_viewport().get_mouse_position())
+	var event_key := event as InputEventKey
+	if event_key and event_key.pressed:
+		if event_key.keycode == KEY_F12:
+			pick(get_viewport().get_mouse_position())
 
 
 func pick(mpos: Vector2) -> void:
@@ -295,8 +289,10 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 	
 	for i in root.get_child_count(true):
 		var child := root.get_child(i, true)
+		var child_canvas_item := child as CanvasItem
+		var child_control := child as Control
 		
-		if (child is CanvasItem and not child.visible):
+		if (child_canvas_item and not child_canvas_item.visible):
 			#print(s, child, " is invisible or viewport")
 			continue
 		if child is Viewport:
@@ -304,7 +300,7 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 		if child == _control_highlighter:
 			continue
 		
-		if child is Control and child.get_global_rect().has_point(mpos):
+		if child_control and child_control.get_global_rect().has_point(mpos):
 			var c := _pick(child, mpos, level + 1)
 			if c != null:
 				return c
@@ -384,8 +380,8 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
-			var index_path = get_node_index_path(node)
-			var string_path = path_to_get_child_string(index_path)
+			var index_path := get_node_index_path(node)
+			var string_path := path_to_get_child_string(index_path)
 			DisplayServer.clipboard_set(string_path)
 			print("Copied to clipboard: %s"%[string_path])
 
@@ -415,7 +411,7 @@ static func get_node_index_path(node: Node) -> PackedInt32Array:
 	return ipath
 
 static func path_to_get_child_string(ipath: PackedInt32Array) -> String:
-	var code = "get_tree().root"
+	var code: String = "get_tree().root"
 	for i in ipath:
 		code += str(".get_child(", i, ")")
 	return code

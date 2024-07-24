@@ -1,7 +1,7 @@
 @tool
 
 
-static func get_node_in_parents(node: Node, klass) -> Node:
+static func get_node_in_parents(node: Node, klass: Variant) -> Node:
 	while node != null:
 		node = node.get_parent()
 		if node != null and is_instance_of(node, klass):
