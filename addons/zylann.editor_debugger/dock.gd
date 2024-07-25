@@ -58,9 +58,9 @@ func _ready() -> void:
 	_popup_menu.clear()
 	for id: int in _popup_action_names:
 		var popup_data: Dictionary = _popup_action_names[id]
-		_popup_menu.add_item(str(popup_data.title), id)
+		_popup_menu.add_item(popup_data.title as Variant as String, id)
 		var index := _popup_menu.get_item_index(id)
-		_popup_menu.set_item_tooltip(index, str(popup_data.tooltip))
+		_popup_menu.set_item_tooltip(index, popup_data.tooltip as Variant as String)
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
@@ -173,6 +173,13 @@ func _on_Tree_item_selected() -> void:
 	_select_node()
 
 
+func _on_Tree_item_mouse_selected(_position: Vector2, mouse_button_index: int) -> void:
+	if mouse_button_index == MOUSE_BUTTON_RIGHT:
+		_select_node()
+		_popup_menu.popup()
+		_popup_menu.set_position(get_viewport().get_mouse_position())
+
+
 func _highlight_node(node: Node) -> void:
 	if node is Control:
 		var target_control := (node as Control)
@@ -259,7 +266,7 @@ func _on_Tree_nothing_selected() -> void:
 
 func _input(event: InputEvent) -> void:
 	var event_key := event as InputEventKey
-	if event_key and event_key.pressed:
+	if event_key != null and event_key.pressed:
 		if event_key.keycode == KEY_F12:
 			pick(get_viewport().get_mouse_position())
 
@@ -289,10 +296,9 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 	
 	for i in root.get_child_count(true):
 		var child := root.get_child(i, true)
-		var child_canvas_item := child as CanvasItem
-		var child_control := child as Control
 		
-		if (child_canvas_item and not child_canvas_item.visible):
+		var child_canvas_item := child as CanvasItem
+		if (child_canvas_item != null and not child_canvas_item.visible):
 			#print(s, child, " is invisible or viewport")
 			continue
 		if child is Viewport:
@@ -300,7 +306,8 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 		if child == _control_highlighter:
 			continue
 		
-		if child_control and child_control.get_global_rect().has_point(mpos):
+		var child_control := child as Control
+		if child_control != null and child_control.get_global_rect().has_point(mpos):
 			var c := _pick(child, mpos, level + 1)
 			if c != null:
 				return c
