@@ -58,9 +58,11 @@ func _ready() -> void:
 	_popup_menu.clear()
 	for id: int in _popup_action_names:
 		var popup_data: Dictionary = _popup_action_names[id]
-		_popup_menu.add_item(popup_data.title as Variant as String, id)
+		var popup_title: String = popup_data.title
+		var popup_tooltip: String = popup_data.tooltip
+		_popup_menu.add_item(popup_title, id)
 		var index := _popup_menu.get_item_index(id)
-		_popup_menu.set_item_tooltip(index, popup_data.tooltip as Variant as String)
+		_popup_menu.set_item_tooltip(index, popup_tooltip)
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
