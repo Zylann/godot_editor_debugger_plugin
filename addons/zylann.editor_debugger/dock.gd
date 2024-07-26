@@ -57,6 +57,7 @@ func get_tree_view() -> Tree:
 func _ready() -> void:
 	_popup_menu.clear()
 	for id: int in _popup_action_names:
+		# Doing all of this typed unpacking to fix extra GDScript unsafe cast warnings
 		var popup_data: Dictionary = _popup_action_names[id]
 		var popup_title: String = popup_data.title
 		var popup_tooltip: String = popup_data.tooltip
@@ -175,7 +176,7 @@ func _on_Tree_item_selected() -> void:
 	_select_node()
 
 
-func _on_Tree_item_mouse_selected(_position: Vector2, mouse_button_index: int) -> void:
+func _on_Tree_item_mouse_selected(_unused_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index == MOUSE_BUTTON_RIGHT:
 		_select_node()
 		_popup_menu.popup()
@@ -357,7 +358,7 @@ static func restore_ownership(root: Node, owners: Dictionary, include_internal: 
 		restore_ownership(child, owners, include_internal)
 
 
-func _on_ShowInInspectorCheckbox_toggled(_button_pressed: bool) -> void:
+func _on_ShowInInspectorCheckbox_toggled(_unused_button_pressed: bool) -> void:
 	pass
 
 
@@ -408,7 +409,8 @@ func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	ResourceSaver.save(packed_scene, path)
 	# Revert ownership of all children.
 	restore_ownership(node, owners, true)
-	
+
+
 static func get_node_index_path(node: Node) -> PackedInt32Array:
 	var ipath := PackedInt32Array()
 
@@ -418,6 +420,7 @@ static func get_node_index_path(node: Node) -> PackedInt32Array:
 
 	ipath.reverse()
 	return ipath
+
 
 static func path_to_get_child_string(ipath: PackedInt32Array) -> String:
 	var code: String = "get_tree().root"
