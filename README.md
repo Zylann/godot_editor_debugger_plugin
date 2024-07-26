@@ -1,4 +1,4 @@
-Editor debugger plugin for Godot Engine 3
+Editor debugger plugin for Godot Engine 4.2+
 =============================================
 
 This plugin allows you to inspect the editor's scene tree itself, within the editor.
