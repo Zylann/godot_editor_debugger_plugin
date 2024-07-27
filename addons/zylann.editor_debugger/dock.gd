@@ -49,6 +49,7 @@ var _control_highlighter: ColorRect = null
 # @see _update_node_view
 var _no_texture := get_theme_icon("", "EditorIcons")
 
+var current_node: Node
 
 func get_tree_view() -> Tree:
 	return _tree_view
@@ -164,8 +165,11 @@ func _update_node_view(node: Node, view: TreeItem) -> void:
 func _select_node() -> void:
 	var node_view := _tree_view.get_selected()
 	var node := _get_node_from_view(node_view)
+
+	if(node != current_node):
+		print("Selected ", node)
 	
-	print("Selected ", node)
+	current_node = node
 	
 	_highlight_node(node)
 	
