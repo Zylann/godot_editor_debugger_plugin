@@ -25,4 +25,4 @@ func _exit_tree() -> void:
 func _on_EditorDebugger_node_selected(node: Node) -> void:
 	if _dock.is_inspection_enabled():
 		# Oops.
-		get_editor_interface().inspect_object(node)
+		EditorInterface.inspect_object(node)
