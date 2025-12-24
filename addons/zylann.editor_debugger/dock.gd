@@ -1,6 +1,9 @@
 @tool
 extends Control
 
+const filter_match_color := Color(1.0, 1.0, 1.0, 1.0)
+const filter_unmatch_color := Color(1.0, 1.0, 1.0, 0.5)
+
 const Util = preload("util.gd")
 
 signal node_selected(node: Node)
@@ -10,6 +13,7 @@ signal node_selected(node: Node)
 @onready var _label : Label = get_node("VBoxContainer/Label")
 @onready var _tree_view : Tree = get_node("VBoxContainer/Tree")
 @onready var _save_branch_file_dialog : FileDialog = get_node("SaveBranchFileDialog")
+@onready var _filter_line_edit : LineEdit = get_node("VBoxContainer/FilterLineEdit")
 
 const METADATA_NODE_NAME = 0
 
@@ -65,6 +69,8 @@ func _ready() -> void:
 		var index := _popup_menu.get_item_index(id)
 		_popup_menu.set_item_tooltip(index, popup_tooltip)
 
+	_filter_line_edit.right_icon = get_theme_icon("Search", "EditorIcons")
+
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
 		return
@@ -84,10 +90,10 @@ func _process(delta: float) -> void:
 	if Util.is_in_edited_scene(self):
 		set_process(false)
 		return
-		
+
 	var viewport := get_viewport()
 	_label.text = str(viewport.get_mouse_position())
-	
+
 	_time_before_next_update -= delta
 	if _time_before_next_update <= 0:
 		_time_before_next_update = _update_interval
@@ -101,11 +107,11 @@ func _update_tree() -> void:
 		return
 
 	#print("Updating tree")
-	
+
 	var root_view := _tree_view.get_root()
 	if root_view == null:
 		root_view = _create_node_view(root, null)
-	
+
 	_update_branch(root, root_view)
 
 
@@ -115,9 +121,9 @@ func _update_branch(root: Node, root_view: TreeItem) -> void:
 		# The editor is a big tree, don't waste cycles on things you can't see
 		#print(root, " is collapsed and first child is ", root_view.get_first_child())
 		return
-	
+
 	var children_views := root_view.get_children()
-	
+
 	for i in root.get_child_count(true):
 		var child := root.get_child(i, true)
 		var child_view: TreeItem
@@ -130,7 +136,7 @@ func _update_branch(root: Node, root_view: TreeItem) -> void:
 			if child.name != child_view_name:
 				_update_node_view(child, child_view)
 		_update_branch(child, child_view)
-	
+
 	# Remove excess tree items
 	if root.get_child_count(true) < len(children_views):
 		for i in range(root.get_child_count(true), len(children_views)):
@@ -150,25 +156,25 @@ func _create_node_view(node: Node, parent_view: TreeItem) -> TreeItem:
 func _update_node_view(node: Node, view: TreeItem) -> void:
 	assert(node is Node)
 	assert(view is TreeItem)
-	
+
 	var icon_texture := get_theme_icon(node.get_class(), "EditorIcons")
 	if (icon_texture == null or icon_texture == _no_texture):
 		icon_texture = get_theme_icon("Node", "EditorIcons")
-	
+
 	view.set_icon(0, icon_texture)
 	view.set_text(0, str(node.get_class(), ": ", node.name))
-	
+
 	view.set_metadata(METADATA_NODE_NAME, node.name)
 
 
 func _select_node() -> void:
 	var node_view := _tree_view.get_selected()
 	var node := _get_node_from_view(node_view)
-	
+
 	print("Selected ", node)
-	
+
 	_highlight_node(node)
-	
+
 	emit_signal("node_selected", node)
 
 
@@ -196,7 +202,7 @@ func _highlight_node(node: Node) -> void:
 func _get_node_from_view(node_view: TreeItem) -> Node:
 	if node_view.get_parent() == null:
 		return get_tree().root
-	
+
 	# Reconstruct path
 	var path: String = node_view.get_metadata(METADATA_NODE_NAME)
 	var parent_view := node_view
@@ -206,41 +212,41 @@ func _get_node_from_view(node_view: TreeItem) -> Node:
 		if parent_view.get_parent() == null:
 			break
 		path = str(parent_view.get_metadata(METADATA_NODE_NAME), "/", path)
-	
+
 	var node := get_tree().root.get_node(path)
 	return node
 
 
 func _focus_in_tree(node: Node) -> void:
 	_update_tree()
-	
+
 	var parent: Node = get_tree().root
 	var path := node.get_path()
 	var parent_view := _tree_view.get_root()
-	
+
 	var node_view: TreeItem = null
-	
+
 	for i in range(1, path.get_name_count()):
 		var part := path.get_name(i)
 		print(part)
-		
+
 		var child_view := parent_view.get_first_child()
 		if child_view == null:
 			_update_branch(parent, parent_view)
-		
+
 		child_view = parent_view.get_first_child()
-		
+
 		while child_view != null and child_view.get_metadata(METADATA_NODE_NAME) != part:
 			child_view = child_view.get_next()
-		
+
 		if child_view == null:
 			node_view = parent_view
 			break
-		
+
 		node_view = child_view
 		parent = parent.get_node(NodePath(part))
 		parent_view = child_view
-	
+
 	if node_view != null:
 		_uncollapse_to_root(node_view)
 		node_view.select(0)
@@ -271,6 +277,8 @@ func _input(event: InputEvent) -> void:
 	var event_key := event as InputEventKey
 	if event_key != null and event_key.pressed:
 		if event_key.keycode == KEY_F12:
+			_filter_line_edit.text = ""
+			_update_filter()
 			pick(get_viewport().get_mouse_position())
 
 
@@ -294,12 +302,12 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 #		s = str(s, "  ")
 #
 #	print(s, "Looking at ", root, ": ", root.name)
-	
+
 	var node: Node = null
-	
+
 	for i in root.get_child_count(true):
 		var child := root.get_child(i, true)
-		
+
 		var child_canvas_item := child as CanvasItem
 		if (child_canvas_item != null and not child_canvas_item.visible):
 			#print(s, child, " is invisible or viewport")
@@ -308,7 +316,7 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 			continue
 		if child == _control_highlighter:
 			continue
-		
+
 		var child_control := child as Control
 		if child_control != null and child_control.get_global_rect().has_point(mpos):
 			var c := _pick(child, mpos, level + 1)
@@ -320,7 +328,7 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 			var c := _pick(child, mpos, level + 1)
 			if c != null:
 				return c
-	
+
 	return node
 
 # @param root
@@ -333,7 +341,7 @@ static func override_ownership(root: Node, owners: Dictionary, include_internal:
 # @param root
 # @param node
 # @param {Dictionary[Node, Node]} owners
-static func _override_ownership_recursive(root: Node, node: Node, owners: Dictionary, 
+static func _override_ownership_recursive(root: Node, node: Node, owners: Dictionary,
 	include_internal: bool) -> void:
 	# Make root own all children of node.
 	for child in node.get_children(include_internal):
@@ -367,13 +375,13 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 	match id:
 		POPUP_ACTIONS.SAVE_BRANCH_AS_SCENE:
 			_save_branch_file_dialog.popup_centered_ratio()
-		
+
 		POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
 			DisplayServer.clipboard_set(node.get_path())
 			print("Copied to clipboard: %s"%[node.get_path()])
-		
+
 		POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
@@ -386,7 +394,7 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 			var node_types_str := "%s"%[node_types]
 			DisplayServer.clipboard_set(node_types_str)
 			print("Copied to clipboard: %s"%[node_types_str])
-		
+
 		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
 			var node_view := _tree_view.get_selected()
 			var node := _get_node_from_view(node_view)
@@ -429,3 +437,50 @@ static func path_to_get_child_string(ipath: PackedInt32Array) -> String:
 	return code
 
 
+func _filter_branch(root_view: TreeItem, regex: RegEx) -> bool:
+	var filter_match: bool = regex.search(root_view.get_text(0)) != null
+	var child_filter_match: bool = false
+	for item: TreeItem in root_view.get_children():
+		child_filter_match = _filter_branch(item, regex) or child_filter_match
+
+	root_view.visible = true
+	if not filter_match:
+		if child_filter_match:
+			root_view.set_icon_modulate(0, filter_unmatch_color)
+			root_view.set_custom_color(0, filter_unmatch_color)
+		else:
+			root_view.visible = false
+	else:
+		root_view.set_custom_color(0, filter_match_color)
+		root_view.set_icon_modulate(0, filter_match_color)
+		if _filter_line_edit.text != "":
+			root_view.uncollapse_tree()
+	return child_filter_match or filter_match
+
+
+func _unfilter_branch(root_view: TreeItem) -> bool:
+	var child_selected := false
+	for item: TreeItem in root_view.get_children():
+		child_selected = _unfilter_branch(item) or child_selected
+
+	root_view.set_custom_color(0, filter_match_color)
+	root_view.set_icon_modulate(0, filter_match_color)
+	root_view.collapsed = !child_selected
+	root_view.visible = true
+	return child_selected or root_view.is_selected(0)
+
+
+func _on_filter_line_edit_text_changed(new_text: String) -> void:
+	_update_filter()
+
+
+func _update_filter() -> void:
+	var text := _filter_line_edit.text
+	if not text.is_empty():
+		var regex := RegEx.new()
+		regex.compile("(?i)"+text)
+		_filter_branch(_tree_view.get_root(), regex)
+	else:
+		_unfilter_branch(_tree_view.get_root())
+	await get_tree().process_frame
+	_tree_view.ensure_cursor_is_visible()

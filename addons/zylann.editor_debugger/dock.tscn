@@ -1,41 +1,51 @@
-[gd_scene load_steps=2 format=3 uid="uid://d0sxhc6l66egc"]
+[gd_scene format=3 uid="uid://d0sxhc6l66egc"]
 
-[ext_resource type="Script" path="res://addons/zylann.editor_debugger/dock.gd" id="1"]
+[ext_resource type="Script" uid="uid://vpgnmtcfvsfr" path="res://addons/zylann.editor_debugger/dock.gd" id="1"]
 
-[node name="EditorDebugger" type="Control"]
+[sub_resource type="DPITexture" id="DPITexture_7dk6n"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#ff5d5d\" d=\"M2 1v8.586l1.293-1.293a1 1 0 0 1 1.414 0L7 10.587l2.293-2.293a1 1 0 0 1 1.414 0L13 10.586l1-1V6H9V1H2zm8 0v4h4zm-6 9.414-2 2V15h12v-2.586l-.293.293a1 1 0 0 1-1.414 0L10 10.414l-2.293 2.293a1 1 0 0 1-1.414 0L4 10.414z\"/></svg>
+"
+
+[node name="EditorDebugger" type="Control" unique_id=1069202021]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 238.0
 offset_bottom = 347.0
 script = ExtResource("1")
 
-[node name="PopupMenu" type="PopupMenu" parent="."]
+[node name="PopupMenu" type="PopupMenu" parent="." unique_id=1891947773]
 hide_on_item_selection = false
 hide_on_checkable_item_selection = false
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1197953799]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer"]
+[node name="ShowInInspectorCheckbox" type="CheckBox" parent="VBoxContainer" unique_id=813446399]
 layout_mode = 2
 text = "Show in inspector"
 
-[node name="Tree" type="Tree" parent="VBoxContainer"]
+[node name="FilterLineEdit" type="LineEdit" parent="VBoxContainer" unique_id=940973578]
+layout_mode = 2
+placeholder_text = "Filter"
+right_icon = SubResource("DPITexture_7dk6n")
+
+[node name="Tree" type="Tree" parent="VBoxContainer" unique_id=1727266992]
 layout_mode = 2
 size_flags_vertical = 3
 allow_rmb_select = true
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=12719679]
 layout_mode = 2
 text = "Hello World"
 
-[node name="SaveBranchFileDialog" type="FileDialog" parent="."]
+[node name="SaveBranchFileDialog" type="FileDialog" parent="." unique_id=309312068]
 filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 
 [connection signal="id_pressed" from="PopupMenu" to="." method="_on_popup_menu_id_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
+[connection signal="text_changed" from="VBoxContainer/FilterLineEdit" to="." method="_on_filter_line_edit_text_changed"]
 [connection signal="item_mouse_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_mouse_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
 [connection signal="nothing_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_nothing_selected"]
