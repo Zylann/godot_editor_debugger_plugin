@@ -43,6 +43,7 @@ const _update_interval = 1.0
 
 var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
+var _deferred_update_pending := false
 
 # The default "icon not found" texture. Captured so it can be compared against when trying to
 # find a specific icon.
@@ -55,6 +56,8 @@ func get_tree_view() -> Tree:
 
 
 func _ready() -> void:
+	if Util.is_in_edited_scene(self):
+		return
 	_popup_menu.clear()
 	for id: int in _popup_action_names:
 		# Doing all of this typed unpacking to fix extra GDScript unsafe cast warnings
@@ -88,10 +91,14 @@ func _process(delta: float) -> void:
 	var viewport := get_viewport()
 	_label.text = str(viewport.get_mouse_position())
 	
-	_time_before_next_update -= delta
-	if _time_before_next_update <= 0:
-		_time_before_next_update = _update_interval
+	if _deferred_update_pending:
+		_deferred_update_pending = false
 		_update_tree()
+	else:
+		_time_before_next_update -= delta
+		if _time_before_next_update <= 0:
+			_time_before_next_update = _update_interval
+			_update_tree()
 
 
 func _update_tree() -> void:
@@ -109,32 +116,52 @@ func _update_tree() -> void:
 	_update_branch(root, root_view)
 
 
-func _update_branch(root: Node, root_view: TreeItem) -> void:
-	if root_view.collapsed and root_view.get_first_child() != null:
+func _update_branch(root: Node, root_view: TreeItem, force_one_level := false) -> void:
+	var child_count := root.get_child_count(true)
+	
+	if root_view.collapsed and not force_one_level:
 		# Don't care about collapsed nodes.
-		# The editor is a big tree, don't waste cycles on things you can't see
-		#print(root, " is collapsed and first child is ", root_view.get_first_child())
-		return
+		# The editor is a big tree, don't waste cycles on things you can't see.
+		# Only update whether to show a collapsing arrow or not.
+		if child_count > 0 and root_view.get_first_child() == null:
+			# Fake child to show the collapsing button.
+			# If it ever gets shown, put some placeholder text.
+			var view := _tree_view.create_item(root_view)
+			view.set_metadata(METADATA_NODE_NAME, "")
+			view.set_text(0, "Loading...")
+			view.collapsed = true
+		
+		elif child_count == 0 and root_view.get_first_child() != null:
+			# Clear child views
+			var children_views := root_view.get_children()
+			for child in children_views:
+				child.free()
+		
+		# Note: we don't try to clear excess children recursively. It usually allows remembering
+		# their collapsed state when the user toggles branches in and out, assuming they don't change.
+		
+	else:
+		# Children are visible, or we want to create their TreeItem anyways
+		
+		var children_views := root_view.get_children()
 	
-	var children_views := root_view.get_children()
+		for i in root.get_child_count(true):
+			var child := root.get_child(i, true)
+			var child_view: TreeItem
+			if i >= len(children_views):
+				child_view = _create_node_view(child, root_view)
+				children_views.append(child_view)
+			else:
+				child_view = children_views[i]
+				var child_view_name : String = child_view.get_metadata(METADATA_NODE_NAME)
+				if child.name != child_view_name:
+					_update_node_view(child, child_view)
+			_update_branch(child, child_view)
 	
-	for i in root.get_child_count(true):
-		var child := root.get_child(i, true)
-		var child_view: TreeItem
-		if i >= len(children_views):
-			child_view = _create_node_view(child, root_view)
-			children_views.append(child_view)
-		else:
-			child_view = children_views[i]
-			var child_view_name: String = child_view.get_metadata(METADATA_NODE_NAME)
-			if child.name != child_view_name:
-				_update_node_view(child, child_view)
-		_update_branch(child, child_view)
-	
-	# Remove excess tree items
-	if root.get_child_count(true) < len(children_views):
-		for i in range(root.get_child_count(true), len(children_views)):
-			children_views[i].free()
+		# Remove excess tree items
+		if child_count < len(children_views):
+			for i in range(child_count, len(children_views)):
+				children_views[i].free()
 
 
 func _create_node_view(node: Node, parent_view: TreeItem) -> TreeItem:
@@ -165,8 +192,6 @@ func _select_node() -> void:
 	var node_view := _tree_view.get_selected()
 	var node := _get_node_from_view(node_view)
 	
-	print("Selected ", node)
-	
 	_highlight_node(node)
 	
 	emit_signal("node_selected", node)
@@ -181,6 +206,10 @@ func _on_Tree_item_mouse_selected(_unused_position: Vector2, mouse_button_index:
 		_select_node()
 		_popup_menu.popup()
 		_popup_menu.set_position(get_viewport().get_mouse_position())
+
+
+func _on_tree_item_collapsed(item: TreeItem) -> void:
+	_deferred_update_pending = true
 
 
 func _highlight_node(node: Node) -> void:
@@ -222,13 +251,9 @@ func _focus_in_tree(node: Node) -> void:
 	
 	for i in range(1, path.get_name_count()):
 		var part := path.get_name(i)
-		print(part)
 		
+		_update_branch(parent, parent_view, true)
 		var child_view := parent_view.get_first_child()
-		if child_view == null:
-			_update_branch(parent, parent_view)
-		
-		child_view = parent_view.get_first_child()
 		
 		while child_view != null and child_view.get_metadata(METADATA_NODE_NAME) != part:
 			child_view = child_view.get_next()
@@ -278,7 +303,6 @@ func pick(mpos: Vector2) -> void:
 	var root := get_tree().root
 	var node := _pick(root, mpos)
 	if node != null:
-		print("Picked ", node, " at ", node.get_path())
 		_focus_in_tree(node)
 	else:
 		_highlight_node(null)
