@@ -25,6 +25,7 @@ text = "Show in inspector"
 [node name="Tree" type="Tree" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+allow_reselect = true
 allow_rmb_select = true
 
 [node name="Label" type="Label" parent="VBoxContainer"]
