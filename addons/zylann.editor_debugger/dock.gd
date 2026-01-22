@@ -3,8 +3,6 @@ extends Control
 
 const Util = preload("util.gd")
 
-signal node_selected(node: Node)
-
 @onready var _popup_menu : PopupMenu = get_node("PopupMenu")
 @onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 @onready var _label : Label = get_node("VBoxContainer/Label")
@@ -194,7 +192,31 @@ func _select_node() -> void:
 	
 	_highlight_node(node)
 	
-	emit_signal("node_selected", node)
+	if _inspection_checkbox.button_pressed:
+		_inspect_object(node)
+
+
+func _on_ShowInInspectorCheckbox_toggled(button_pressed: bool) -> void:
+	if Util.is_in_edited_scene(self):
+		return
+	if not button_pressed:
+		return
+	var node_view := _tree_view.get_selected()
+	var node := _get_node_from_view(node_view)
+	_inspect_object(node)
+
+
+func _inspect_object(node: Node) -> void:
+	if _is_under_editor_inspector(node):
+		# Prevent inspecting the inspector, because unfortunately it can crash.
+		# Something inside Godot is not handling well the possibility that what is inspected
+		# could be freed anytime.
+		return
+	EditorInterface.inspect_object(node, "", true)
+
+
+func _is_under_editor_inspector(node: Node) -> bool:
+	return Util.get_node_in_parents(node, EditorInspector) != null
 
 
 func _on_Tree_item_selected() -> void:
@@ -308,10 +330,6 @@ func pick(mpos: Vector2) -> void:
 		_highlight_node(null)
 
 
-func is_inspection_enabled() -> bool:
-	return _inspection_checkbox.button_pressed
-
-
 func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 #	var s := ""
 #	for i in level:
@@ -380,10 +398,6 @@ static func restore_ownership(root: Node, owners: Dictionary, include_internal: 
 		else:
 			child.set_owner(null)
 		restore_ownership(child, owners, include_internal)
-
-
-func _on_ShowInInspectorCheckbox_toggled(_unused_button_pressed: bool) -> void:
-	pass
 
 
 func _on_popup_menu_id_pressed(id: int) -> void:
