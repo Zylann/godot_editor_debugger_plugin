@@ -36,6 +36,7 @@ filters = PackedStringArray("*.tscn ; TSCN", "*.scn ; SCN", "*.res ; RES")
 
 [connection signal="id_pressed" from="PopupMenu" to="." method="_on_popup_menu_id_pressed"]
 [connection signal="toggled" from="VBoxContainer/ShowInInspectorCheckbox" to="." method="_on_ShowInInspectorCheckbox_toggled"]
+[connection signal="item_collapsed" from="VBoxContainer/Tree" to="." method="_on_tree_item_collapsed"]
 [connection signal="item_mouse_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_mouse_selected"]
 [connection signal="item_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_item_selected"]
 [connection signal="nothing_selected" from="VBoxContainer/Tree" to="." method="_on_Tree_nothing_selected"]
