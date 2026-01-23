@@ -281,6 +281,11 @@ func _input(event: InputEvent) -> void:
 	if event_key != null and event_key.pressed:
 		if event_key.keycode == KEY_F12:
 			pick(get_viewport().get_mouse_position())
+	
+	var event_mouse_button := event as InputEventMouseButton
+	if event_mouse_button != null and event_mouse_button.pressed:
+		if event_mouse_button.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+			_control_highlighter.hide()
 
 
 func pick(mpos: Vector2) -> void:
