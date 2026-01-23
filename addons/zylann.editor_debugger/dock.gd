@@ -3,8 +3,6 @@ extends Control
 
 const Util = preload("util.gd")
 
-signal node_selected(node: Node)
-
 @onready var _popup_menu : PopupMenu = get_node("PopupMenu")
 @onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 @onready var _label : Label = get_node("VBoxContainer/Label")
@@ -194,7 +192,18 @@ func _select_node() -> void:
 	
 	_highlight_node(node)
 	
-	emit_signal("node_selected", node)
+	if _inspection_checkbox.button_pressed:
+		EditorInterface.inspect_object(node, "", true)
+
+
+func _on_ShowInInspectorCheckbox_toggled(button_pressed: bool) -> void:
+	if Util.is_in_edited_scene(self):
+		return
+	if not button_pressed:
+		return
+	var node_view := _tree_view.get_selected()
+	var node := _get_node_from_view(node_view)
+	EditorInterface.inspect_object(node, "", true)
 
 
 func _on_Tree_item_selected() -> void:
@@ -297,6 +306,11 @@ func _input(event: InputEvent) -> void:
 	if event_key != null and event_key.pressed:
 		if event_key.keycode == KEY_F12:
 			pick(get_viewport().get_mouse_position())
+	
+	var event_mouse_button := event as InputEventMouseButton
+	if event_mouse_button != null and event_mouse_button.pressed:
+		if event_mouse_button.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+			_control_highlighter.hide()
 
 
 func pick(mpos: Vector2) -> void:
@@ -306,10 +320,6 @@ func pick(mpos: Vector2) -> void:
 		_focus_in_tree(node)
 	else:
 		_highlight_node(null)
-
-
-func is_inspection_enabled() -> bool:
-	return _inspection_checkbox.button_pressed
 
 
 func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
@@ -380,10 +390,6 @@ static func restore_ownership(root: Node, owners: Dictionary, include_internal: 
 		else:
 			child.set_owner(null)
 		restore_ownership(child, owners, include_internal)
-
-
-func _on_ShowInInspectorCheckbox_toggled(_unused_button_pressed: bool) -> void:
-	pass
 
 
 func _on_popup_menu_id_pressed(id: int) -> void:
