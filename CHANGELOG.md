@@ -12,6 +12,7 @@ This version requires Godot 4.2 or later.
 
 - Added a menu to copy node access codes using `get_child(index)` instead of names (thanks to ryevdokimov)
 - Fixed optional GDScript warnings that could show up when addon warnings are enabled (thanks to pineapplemachine); breaks compatibility with versions of Godot older than 4.2
+- Fixed focus with F12 wasn't always reaching the right node in the tree view (PR #14)
 
 
 0.3
