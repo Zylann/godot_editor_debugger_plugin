@@ -14,6 +14,7 @@ This version requires Godot 4.2 or later.
 - Disabled inspection of nodes below `EditorInspector` because it can crash Godot.
 - Fixed optional GDScript warnings that could show up when addon warnings are enabled (thanks to pineapplemachine); breaks compatibility with versions of Godot older than 4.2
 - Fixed focus with F12 wasn't always reaching the right node in the tree view (PR #14)
+- Fixed node inspection wasn't updating for the last selection when enabling "show in inspector" (PR #15)
 
 
 0.3
