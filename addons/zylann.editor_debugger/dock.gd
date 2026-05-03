@@ -156,7 +156,11 @@ func _input(event: InputEvent) -> void:
 	
 	var event_mouse_button := event as InputEventMouseButton
 	if event_mouse_button != null and event_mouse_button.pressed:
-		if event_mouse_button.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+		if event_mouse_button.button_index in [
+			MOUSE_BUTTON_LEFT, 
+			MOUSE_BUTTON_MIDDLE, 
+			MOUSE_BUTTON_RIGHT
+		]:
 			_control_highlighter.hide()
 
 
