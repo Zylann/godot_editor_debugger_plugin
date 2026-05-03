@@ -9,3 +9,6 @@
 /icon.png.import    export-ignore
 /project.godot      export-ignore
 /README.md          export-ignore
+
+# Normalize EOL for all files that Git considers text files.
+* text=auto eol=lf
