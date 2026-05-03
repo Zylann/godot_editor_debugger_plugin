@@ -2,14 +2,13 @@
 extends Control
 
 const Util = preload("util.gd")
+const LiveTree = preload("./live_tree.gd")
 
 @onready var _popup_menu : PopupMenu = get_node("PopupMenu")
 @onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
 @onready var _label : Label = get_node("VBoxContainer/Label")
-@onready var _tree_view : Tree = get_node("VBoxContainer/Tree")
+@onready var _tree_view : LiveTree = get_node("VBoxContainer/LiveTree")
 @onready var _save_branch_file_dialog : FileDialog = get_node("SaveBranchFileDialog")
-
-const METADATA_NODE_NAME = 0
 
 enum POPUP_ACTIONS {
 	SAVE_BRANCH_AS_SCENE,
@@ -37,26 +36,15 @@ const _popup_action_names: Dictionary = {
 	}
 }
 
-const _update_interval = 1.0
-
-var _time_before_next_update := 0.0
 var _control_highlighter: ColorRect = null
-var _deferred_update_pending := false
-
-# The default "icon not found" texture. Captured so it can be compared against when trying to
-# find a specific icon.
-# @see _update_node_view
-var _no_texture := get_theme_icon("", "EditorIcons")
-
-
-func get_tree_view() -> Tree:
-	return _tree_view
 
 
 func _ready() -> void:
 	if Util.is_in_edited_scene(self):
 		return
+	
 	_popup_menu.clear()
+	
 	for id: int in _popup_action_names:
 		# Doing all of this typed unpacking to fix extra GDScript unsafe cast warnings
 		var popup_data: Dictionary = _popup_action_names[id]
@@ -65,6 +53,11 @@ func _ready() -> void:
 		_popup_menu.add_item(popup_title, id)
 		var index := _popup_menu.get_item_index(id)
 		_popup_menu.set_item_tooltip(index, popup_tooltip)
+	
+	_tree_view.item_selected.connect(_on_tree_item_selected)
+	_tree_view.item_mouse_selected.connect(_on_tree_item_mouse_selected)
+	_tree_view.nothing_selected.connect(_on_tree_nothing_selected)
+
 
 func _enter_tree() -> void:
 	if Util.is_in_edited_scene(self):
@@ -85,110 +78,13 @@ func _process(delta: float) -> void:
 	if Util.is_in_edited_scene(self):
 		set_process(false)
 		return
-		
+	
 	var viewport := get_viewport()
 	_label.text = str(viewport.get_mouse_position())
-	
-	if _deferred_update_pending:
-		_deferred_update_pending = false
-		_update_tree()
-	else:
-		_time_before_next_update -= delta
-		if _time_before_next_update <= 0:
-			_time_before_next_update = _update_interval
-			_update_tree()
-
-
-func _update_tree() -> void:
-	var root := get_tree().root
-	if root == null:
-		_tree_view.clear()
-		return
-
-	#print("Updating tree")
-	
-	var root_view := _tree_view.get_root()
-	if root_view == null:
-		root_view = _create_node_view(root, null)
-	
-	_update_branch(root, root_view)
-
-
-func _update_branch(root: Node, root_view: TreeItem, force_one_level := false) -> void:
-	var child_count := root.get_child_count(true)
-	
-	if root_view.collapsed and not force_one_level:
-		# Don't care about collapsed nodes.
-		# The editor is a big tree, don't waste cycles on things you can't see.
-		# Only update whether to show a collapsing arrow or not.
-		if child_count > 0 and root_view.get_first_child() == null:
-			# Fake child to show the collapsing button.
-			# If it ever gets shown, put some placeholder text.
-			var view := _tree_view.create_item(root_view)
-			view.set_metadata(METADATA_NODE_NAME, "")
-			view.set_text(0, "Loading...")
-			view.collapsed = true
-		
-		elif child_count == 0 and root_view.get_first_child() != null:
-			# Clear child views
-			var children_views := root_view.get_children()
-			for child in children_views:
-				child.free()
-		
-		# Note: we don't try to clear excess children recursively. It usually allows remembering
-		# their collapsed state when the user toggles branches in and out, assuming they don't change.
-		
-	else:
-		# Children are visible, or we want to create their TreeItem anyways
-		
-		var children_views := root_view.get_children()
-	
-		for i in root.get_child_count(true):
-			var child := root.get_child(i, true)
-			var child_view: TreeItem
-			if i >= len(children_views):
-				child_view = _create_node_view(child, root_view)
-				children_views.append(child_view)
-			else:
-				child_view = children_views[i]
-				var child_view_name : String = child_view.get_metadata(METADATA_NODE_NAME)
-				if child.name != child_view_name:
-					_update_node_view(child, child_view)
-			_update_branch(child, child_view)
-	
-		# Remove excess tree items
-		if child_count < len(children_views):
-			for i in range(child_count, len(children_views)):
-				children_views[i].free()
-
-
-func _create_node_view(node: Node, parent_view: TreeItem) -> TreeItem:
-	#print("Create view for ", node)
-	assert(node is Node)
-	assert(parent_view == null or parent_view is TreeItem)
-	var view := _tree_view.create_item(parent_view)
-	view.collapsed = true
-	_update_node_view(node, view)
-	return view
-
-
-func _update_node_view(node: Node, view: TreeItem) -> void:
-	assert(node is Node)
-	assert(view is TreeItem)
-	
-	var icon_texture := get_theme_icon(node.get_class(), "EditorIcons")
-	if (icon_texture == null or icon_texture == _no_texture):
-		icon_texture = get_theme_icon("Node", "EditorIcons")
-	
-	view.set_icon(0, icon_texture)
-	view.set_text(0, str(node.get_class(), ": ", node.name))
-	
-	view.set_metadata(METADATA_NODE_NAME, node.name)
 
 
 func _select_node() -> void:
-	var node_view := _tree_view.get_selected()
-	var node := _get_node_from_view(node_view)
+	var node := _tree_view.get_selected_node()
 	
 	_highlight_node(node)
 	
@@ -201,8 +97,7 @@ func _on_ShowInInspectorCheckbox_toggled(button_pressed: bool) -> void:
 		return
 	if not button_pressed:
 		return
-	var node_view := _tree_view.get_selected()
-	var node := _get_node_from_view(node_view)
+	var node := _tree_view.get_selected_node()
 	_inspect_object(node)
 
 
@@ -219,19 +114,15 @@ func _is_under_editor_inspector(node: Node) -> bool:
 	return Util.get_node_in_parents(node, EditorInspector) != null
 
 
-func _on_Tree_item_selected() -> void:
+func _on_tree_item_selected() -> void:
 	_select_node()
 
 
-func _on_Tree_item_mouse_selected(_unused_position: Vector2, mouse_button_index: int) -> void:
+func _on_tree_item_mouse_selected(_unused_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index == MOUSE_BUTTON_RIGHT:
 		_select_node()
 		_popup_menu.popup()
 		_popup_menu.set_position(get_viewport().get_mouse_position())
-
-
-func _on_tree_item_collapsed(item: TreeItem) -> void:
-	_deferred_update_pending = true
 
 
 func _highlight_node(node: Node) -> void:
@@ -244,63 +135,6 @@ func _highlight_node(node: Node) -> void:
 		_control_highlighter.hide()
 
 
-func _get_node_from_view(node_view: TreeItem) -> Node:
-	if node_view.get_parent() == null:
-		return get_tree().root
-	
-	# Reconstruct path
-	var path: String = node_view.get_metadata(METADATA_NODE_NAME)
-	var parent_view := node_view
-	while parent_view.get_parent() != null:
-		parent_view = parent_view.get_parent()
-		# Exclude root
-		if parent_view.get_parent() == null:
-			break
-		path = str(parent_view.get_metadata(METADATA_NODE_NAME), "/", path)
-	
-	var node := get_tree().root.get_node(path)
-	return node
-
-
-func _focus_in_tree(node: Node) -> void:
-	_update_tree()
-	
-	var parent: Node = get_tree().root
-	var path := node.get_path()
-	var parent_view := _tree_view.get_root()
-	
-	var node_view: TreeItem = null
-	
-	for i in range(1, path.get_name_count()):
-		var part := path.get_name(i)
-		
-		_update_branch(parent, parent_view, true)
-		var child_view := parent_view.get_first_child()
-		
-		while child_view != null and child_view.get_metadata(METADATA_NODE_NAME) != part:
-			child_view = child_view.get_next()
-		
-		if child_view == null:
-			node_view = parent_view
-			break
-		
-		node_view = child_view
-		parent = parent.get_node(NodePath(part))
-		parent_view = child_view
-	
-	if node_view != null:
-		_uncollapse_to_root(node_view)
-		node_view.select(0)
-		_tree_view.ensure_cursor_is_visible()
-
-
-static func _uncollapse_to_root(node_view: TreeItem) -> void:
-	var parent_view := node_view.get_parent()
-	while parent_view != null:
-		parent_view.collapsed = false
-		parent_view = parent_view.get_parent()
-
-
 static func _get_index_path(node: Node) -> Array[int]:
 	var ipath: Array[int] = []
 	while node.get_parent() != null:
@@ -310,7 +144,7 @@ static func _get_index_path(node: Node) -> Array[int]:
 	return ipath
 
 
-func _on_Tree_nothing_selected() -> void:
+func _on_tree_nothing_selected() -> void:
 	_control_highlighter.hide()
 
 
@@ -330,7 +164,7 @@ func pick(mpos: Vector2) -> void:
 	var root := get_tree().root
 	var node := _pick(root, mpos)
 	if node != null:
-		_focus_in_tree(node)
+		_tree_view.focus_in_tree(node)
 	else:
 		_highlight_node(null)
 
@@ -412,14 +246,12 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 			_save_branch_file_dialog.popup_centered_ratio()
 		
 		POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD:
-			var node_view := _tree_view.get_selected()
-			var node := _get_node_from_view(node_view)
+			var node := _tree_view.get_selected_node()
 			DisplayServer.clipboard_set(node.get_path())
 			print("Copied to clipboard: %s"%[node.get_path()])
 		
 		POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:
-			var node_view := _tree_view.get_selected()
-			var node := _get_node_from_view(node_view)
+			var node := _tree_view.get_selected_node()
 			var node_types := []
 			while node.get_parent():
 				var tuple := PackedStringArray([node.get_class(), node.name])
@@ -431,18 +263,15 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 			print("Copied to clipboard: %s"%[node_types_str])
 		
 		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
-			var node_view := _tree_view.get_selected()
-			var node := _get_node_from_view(node_view)
+			var node := _tree_view.get_selected_node()
 			var index_path := get_node_index_path(node)
 			var string_path := path_to_get_child_string(index_path)
 			DisplayServer.clipboard_set(string_path)
 			print("Copied to clipboard: %s"%[string_path])
 
 
-
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
-	var node_view := _tree_view.get_selected()
-	var node := _get_node_from_view(node_view)
+	var node := _tree_view.get_selected_node()
 	# Make the selected node own all it's children.
 	var owners := {}
 	override_ownership(node, owners, true)
@@ -470,5 +299,3 @@ static func path_to_get_child_string(ipath: PackedInt32Array) -> String:
 	for i in ipath:
 		code += str(".get_child(", i, ")")
 	return code
-
-
