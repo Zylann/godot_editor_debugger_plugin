@@ -4,11 +4,11 @@ extends Control
 const Util = preload("util.gd")
 const LiveTree = preload("./live_tree.gd")
 
-@onready var _popup_menu : PopupMenu = get_node("PopupMenu")
-@onready var _inspection_checkbox : CheckBox = get_node("VBoxContainer/ShowInInspectorCheckbox")
-@onready var _label : Label = get_node("VBoxContainer/Label")
-@onready var _tree_view : LiveTree = get_node("VBoxContainer/LiveTree")
-@onready var _save_branch_file_dialog : FileDialog = get_node("SaveBranchFileDialog")
+@onready var _popup_menu : PopupMenu = $PopupMenu
+@onready var _inspection_checkbox : CheckBox = $VBoxContainer/ShowInInspectorCheckbox
+@onready var _label : Label = $VBoxContainer/Label
+@onready var _tree_view : LiveTree = $VBoxContainer/LiveTree
+@onready var _save_branch_file_dialog : FileDialog = $SaveBranchFileDialog
 
 enum POPUP_ACTIONS {
 	SAVE_BRANCH_AS_SCENE,
