@@ -208,40 +208,6 @@ func _pick(root: Node, mpos: Vector2, level := 0) -> Node:
 	
 	return node
 
-# @param root
-# @param {Dictionary[Node, Node]} owners
-static func override_ownership(root: Node, owners: Dictionary, include_internal: bool) -> void:
-	assert(root is Node)
-	_override_ownership_recursive(root, root, owners, include_internal)
-
-
-# @param root
-# @param node
-# @param {Dictionary[Node, Node]} owners
-static func _override_ownership_recursive(root: Node, node: Node, owners: Dictionary, 
-	include_internal: bool) -> void:
-	# Make root own all children of node.
-	for child in node.get_children(include_internal):
-		if child.owner != null:
-			owners[child] = child.owner
-		child.set_owner(root)
-		_override_ownership_recursive(root, child, owners, include_internal)
-
-
-# @param root
-# @param {Dictionary[Node, Node]} owners
-static func restore_ownership(root: Node, owners: Dictionary, include_internal: bool) -> void:
-	assert(root is Node)
-	# Remove all of root's children's owners.
-	# Also restore node ownership to nodes which had their owner overridden.
-	for child in root.get_children(include_internal):
-		if owners.has(child):
-			child.owner = owners[child]
-			owners.erase(child)
-		else:
-			child.set_owner(null)
-		restore_ownership(child, owners, include_internal)
-
 
 func _on_popup_menu_id_pressed(id: int) -> void:
 	_popup_menu.hide()
@@ -276,15 +242,7 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	var node := _tree_view.get_selected_node()
-	# Make the selected node own all it's children.
-	var owners := {}
-	override_ownership(node, owners, true)
-	# Pack the selected node and it's children into a scene then save it.
-	var packed_scene := PackedScene.new()
-	packed_scene.pack(node)
-	ResourceSaver.save(packed_scene, path)
-	# Revert ownership of all children.
-	restore_ownership(node, owners, true)
+	Util.save_node_branch(node, path)
 
 
 static func get_node_index_path(node: Node) -> PackedInt32Array:
