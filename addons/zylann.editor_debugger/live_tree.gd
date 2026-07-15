@@ -53,7 +53,7 @@ func _on_tree_nothing_selected() -> void:
 
 func get_selected_node() -> Node:
 	var nv := _tree_view.get_selected()
-	return get_node_from_view(nv)
+	return _get_node_from_view(nv)
 
 
 func _process(delta: float) -> void:
@@ -158,7 +158,7 @@ func _update_node_view(node: Node, view: TreeItem) -> void:
 	view.set_metadata(METADATA_NODE_NAME, node.name)
 
 
-func get_node_from_view(node_view: TreeItem) -> Node:
+func _get_node_from_view(node_view: TreeItem) -> Node:
 	if node_view.get_parent() == null:
 		return get_tree().root
 	
