@@ -9,7 +9,18 @@ static func get_node_in_parents(node: Node, klass: Variant) -> Node:
 	return null
 
 
+static func get_focused_window() -> Window:
+	# get_focused_window was exposed in 4.5. class_call_static was exposed in 4.4.
+	if "get_focused_window" in Window:
+		var focused_window: Window = ClassDB.call("class_call_static", "Window", "get_focused_window")
+		return focused_window
+	return null
+
+
 static func is_in_edited_scene(node: Node) -> bool:
+	if "is_part_of_edited_scene" in node:
+		return node.call("is_part_of_edited_scene")
+
 	#                               .___.
 	#           /)               ,-^     ^-. 
 	#          //               /           \
