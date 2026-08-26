@@ -92,6 +92,7 @@ func _create_highlighter() -> void:
 
 
 func _select_node() -> void:
+	# Must be called in response to a selection, so this shouldn't be null
 	var node := _tree_view.get_selected_node()
 	
 	_highlight_node(node)
@@ -106,6 +107,8 @@ func _on_ShowInInspectorCheckbox_toggled(button_pressed: bool) -> void:
 	if not button_pressed:
 		return
 	var node := _tree_view.get_selected_node()
+	if node == null:
+		return
 	_inspect_object(node)
 
 
@@ -286,11 +289,17 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 		
 		POPUP_ACTIONS.COPY_PATH_TO_CLIPBOARD:
 			var node := _tree_view.get_selected_node()
+			if node == null:
+				# Node might have gone away by the time the user made their selection?
+				return
 			DisplayServer.clipboard_set(node.get_path())
 			print("Copied to clipboard: %s"%[node.get_path()])
 		
 		POPUP_ACTIONS.COPY_NODE_TYPES_TO_CLIPBOARD:
 			var node := _tree_view.get_selected_node()
+			if node == null:
+				# Node might have gone away by the time the user made their selection?
+				return
 			var node_types := []
 			while node.get_parent():
 				var tuple := PackedStringArray([node.get_class(), node.name])
@@ -303,6 +312,9 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 		
 		POPUP_ACTIONS.COPY_NODE_CHILD_PATH_INDICES:
 			var node := _tree_view.get_selected_node()
+			if node == null:
+				# Node might have gone away by the time the user made their selection?
+				return
 			var index_path := get_node_index_path(node)
 			var string_path := path_to_get_child_string(index_path)
 			DisplayServer.clipboard_set(string_path)
@@ -311,6 +323,9 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 
 func _on_SaveBranchFileDialog_file_selected(path: String) -> void:
 	var node := _tree_view.get_selected_node()
+	if node == null:
+		# Node might have gone away by the time the user made their selection?
+		return
 	Util.save_node_branch(node, path)
 
 

@@ -53,6 +53,8 @@ func _on_tree_nothing_selected() -> void:
 
 func get_selected_node() -> Node:
 	var nv := _tree_view.get_selected()
+	if nv == null:
+		return null
 	return _get_node_from_view(nv)
 
 

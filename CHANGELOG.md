@@ -5,6 +5,13 @@ This is a high-level changelog for each released versions of the plugin.
 For a more detailed list of past and incoming changes, see the commit history.
 
 
+dev 0.5
+--------
+
+- Added support for multiple windows (PR #17)
+- Fixed error when toggling "Show In Inspector" while no node is selected
+
+
 0.4
 ----
 
